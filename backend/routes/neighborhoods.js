@@ -1,5 +1,6 @@
 // backend/routes/neighborhoods.js
 const router = require('express').Router()
+const db = require('../db')
 
 const HOOD_COLORS = {
   'streeterville': '#1e40af',
@@ -168,7 +169,7 @@ router.get('/', (_req, res) => {
 })
 
 // Hardcoded approximate polygon boundaries for each neighborhood.
-// The Chicago Open Data Portal endpoint (bbvz-uum9) is deprecated and returns no data.
+// Kept as the FALLBACK when the City of Chicago dataset is unreachable and nothing is cached.
 const HOOD_POLYGONS = {
   'streeterville': [
     [-87.624, 41.883], [-87.616, 41.883], [-87.614, 41.890],
@@ -221,14 +222,83 @@ const HOOD_POLYGONS = {
   ],
 }
 
-router.get('/boundaries', (_req, res) => {
-  const features = NEIGHBORHOODS
-    .filter(n => HOOD_POLYGONS[n.id])
-    .map(n => ({
+// Official street-accurate boundaries — City of Chicago "Boundaries - Neighborhoods"
+const BOUNDARIES_URL   = 'https://data.cityofchicago.org/resource/y6yq-dbs2.json?$limit=100'
+const BOUNDS_CACHE_KEY = 'hood_boundaries_v1'
+const BOUNDS_TTL_MS    = 30 * 24 * 60 * 60 * 1000 // 30 days
+const MAX_COORDS       = 3000 // per-neighborhood coordinate budget before decimation
+
+const stmtGet = db.prepare('SELECT data, cached_at FROM yelp_cache WHERE cache_key = ?')
+const stmtSet = db.prepare('INSERT OR REPLACE INTO yelp_cache (cache_key, data, cached_at) VALUES (?, ?, ?)')
+
+// App name (lowercased) → dataset pri_neigh, for hoods with no exact name match.
+// The dataset has no "South Loop" row — Near South Side is the official polygon for that
+// area — and Pilsen is listed under its community-area name, Lower West Side.
+const PRI_NEIGH_ALIASES = {
+  'south loop': 'near south side',
+  'pilsen':     'lower west side',
+}
+
+function countCoords(multi) {
+  let n = 0
+  for (const poly of multi) for (const ring of poly) n += ring.length
+  return n
+}
+
+// Every-Nth-point decimation, preserving each ring's first and last (closing) points.
+// Only applied when a single neighborhood exceeds MAX_COORDS coordinate pairs.
+function simplifyMultiPolygon(multi) {
+  const total = countCoords(multi)
+  if (total <= MAX_COORDS) return multi
+  const step = Math.ceil(total / MAX_COORDS)
+  return multi.map(poly => poly.map(ring =>
+    ring.filter((_, i) => i % step === 0 || i === ring.length - 1)
+  ))
+}
+
+function fallbackFeature(n) {
+  if (!HOOD_POLYGONS[n.id]) return null
+  return {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [HOOD_POLYGONS[n.id]],
+    },
+    properties: {
+      id:      n.id,
+      name:    n.name,
+      color:   HOOD_COLORS[n.id] || '#00d4ff',
+      tagline: n.tagline,
+    },
+  }
+}
+
+function fallbackCollection() {
+  return {
+    type: 'FeatureCollection',
+    features: NEIGHBORHOODS.map(fallbackFeature).filter(Boolean),
+  }
+}
+
+// Build features from the official dataset; any app hood we can't match keeps its
+// hardcoded approximate polygon so the map never loses a neighborhood.
+function buildOfficialCollection(rows) {
+  const byName = new Map()
+  for (const row of rows) {
+    if (row && row.pri_neigh && row.the_geom && Array.isArray(row.the_geom.coordinates)) {
+      byName.set(row.pri_neigh.toLowerCase(), row)
+    }
+  }
+
+  const features = NEIGHBORHOODS.map(n => {
+    const key = n.name.toLowerCase()
+    const row = byName.get(key) || byName.get(PRI_NEIGH_ALIASES[key])
+    if (!row) return fallbackFeature(n)
+    return {
       type: 'Feature',
       geometry: {
-        type: 'Polygon',
-        coordinates: [HOOD_POLYGONS[n.id]],
+        type: 'MultiPolygon',
+        coordinates: simplifyMultiPolygon(row.the_geom.coordinates),
       },
       properties: {
         id:      n.id,
@@ -236,9 +306,35 @@ router.get('/boundaries', (_req, res) => {
         color:   HOOD_COLORS[n.id] || '#00d4ff',
         tagline: n.tagline,
       },
-    }))
+    }
+  }).filter(Boolean)
 
-  res.json({ type: 'FeatureCollection', features })
+  return { type: 'FeatureCollection', features }
+}
+
+router.get('/boundaries', async (_req, res) => {
+  const cached = stmtGet.get(BOUNDS_CACHE_KEY)
+  if (cached && Date.now() - cached.cached_at < BOUNDS_TTL_MS) {
+    return res.json(JSON.parse(cached.data))
+  }
+
+  try {
+    const r = await fetch(BOUNDARIES_URL, {
+      headers: { 'User-Agent': 'ChiAtlas/1.0 (chi atlas app; contact via github)' },
+      signal: AbortSignal.timeout(14000),
+    })
+    if (!r.ok) throw new Error(`Socrata ${r.status}`)
+    const rows = await r.json()
+    if (!Array.isArray(rows) || rows.length === 0) throw new Error('Empty boundaries dataset')
+
+    const payload = buildOfficialCollection(rows)
+    stmtSet.run(BOUNDS_CACHE_KEY, JSON.stringify(payload), Date.now())
+    res.json(payload)
+  } catch {
+    // Stale cache beats the crude hardcoded shapes; hardcoded shapes beat nothing.
+    if (cached) return res.json(JSON.parse(cached.data))
+    res.json(fallbackCollection())
+  }
 })
 
 router.get('/:id', (req, res) => {

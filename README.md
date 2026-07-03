@@ -15,9 +15,9 @@ Repo: https://github.com/AllStreets/chi
 
 | Route | Page | Description |
 |---|---|---|
-| `/` | Home | Cinematic 3D Mapbox map with intro fly-in and Orbit mode — live CTA train dots, official team logo stadium pins (Bulls/Bears sort on top), food and nightlife icons, floating glass IntelFeed (weather, sports scores, tonight's event, closest train, Buzzing Now), ⌘K search pill |
+| `/` | Home | Cinematic 3D Mapbox map (Standard style) with intro fly-in, Orbit mode, Atlas Mode (chrome-free ambient orbit), dawn/day/dusk/night lighting presets (solar-time default) — live CTA train dots, official team logo stadium pins, food and nightlife icons, floating glass IntelFeed, ⌘K search pill |
 | `/explore` | Explore Chicago | Curated landmarks by category (architecture, culture, nature, hidden) with AI guide chat |
-| `/transit` | Transit | Tokyo-Metro-style HUD — full-bleed pitched map, floating glass line panel for all 8 CTA L lines with live per-line counts, animated train positions, Divvy stations, bus overlay |
+| `/transit` | Transit | Tokyo-Metro-style HUD — full-bleed pitched map, floating glass line panel for all 8 CTA L lines with live per-line counts, animated train positions, Divvy stations, bus overlay, **time-machine**: replay the last 24h of train movement with a scrubber (1×–240×) |
 | `/nightlife` | Nightlife | Bars, night clubs, cocktail bars, rooftop bars, wine bars, jazz venues — Mapbox map + 7 neighborhood scene profiles including Streeterville |
 | `/food` | Food & Drink | OSM-powered restaurant map with cuisine filters (restaurants, bars, cafes, pizza, sushi, tacos, brunch) |
 | `/sports` | Sports | Cubs, Sox, Bears, Bulls, Blackhawks, Fire — live scores (refreshes every 90s), today's games, upcoming schedule |
@@ -45,7 +45,9 @@ Repo: https://github.com/AllStreets/chi
 - Canvas: `#030509` near-black · Accent: `#45d8ff` electric cyan · Secondary: `#ff3b53` Chicago red
 - Glass panels (`backdrop-filter` blur + hairline borders), film-grain overlay, vignettes on map pages
 - Fonts: Michroma (display), Archivo (UI), IBM Plex Mono (data/clocks)
-- Global ⌘K command palette; kbd-hint bars on map pages
+- Global ⌘K command palette: page nav + deep search (places, L stations, neighborhoods, events) with map fly-to, plus "Ask ATLAS" AI concierge
+- Map controls: drag rotate, scroll zoom, ↑/↓ pitch, Orbit + Atlas ambient modes; kbd-hint bars on map pages
+- Installable PWA (manifest + service worker); push alerts for games, severe weather, lake days, L delays
 - Full spec: [docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md](./docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md)
 
 **External APIs**

@@ -148,18 +148,20 @@ router.get('/history', (req, res) => {
   }
 })
 
-// GET /api/cta/arrivals?stop=:stopId
+// GET /api/cta/arrivals?stop=:stopId  or  ?mapid=:mapId (station-level)
 router.get('/arrivals', async (req, res) => {
-  const { stop } = req.query
-  if (!stop) return res.status(400).json({ error: 'stop param required' })
+  const { stop, mapid } = req.query
+  if (!stop && !mapid) return res.status(400).json({ error: 'stop or mapid param required' })
   try {
-    const r = await fetch(`${BASE}/ttarrivals.aspx?stpid=${stop}&key=${key()}&outputType=JSON`)
+    const param = stop ? `stpid=${stop}` : `mapid=${mapid}`
+    const r = await fetch(`${BASE}/ttarrivals.aspx?${param}&key=${key()}&outputType=JSON`)
     const data = await r.json()
     const raw = data?.ctatt?.eta
     const arrivals = raw
       ? (Array.isArray(raw) ? raw : [raw]).map(e => ({
           station:       e.staNm,
           line:          e.rt,
+          destination:   e.destNm,
           arrTime:       e.arrT,
           isApproaching: e.isApp === '1',
           isDelayed:     e.isDly === '1',

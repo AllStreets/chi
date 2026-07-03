@@ -11,7 +11,7 @@ import {
   RiExternalLinkLine, RiBug2Line, RiKeyboardLine,
   RiTerminalLine, RiLayoutLine, RiContrastLine, RiSettings3Line,
   RiRestaurantLine, RiHeartPulseLine, RiCompassDiscoverLine,
-  RiMoonLine, RiLineChartLine,
+  RiMoonLine, RiLineChartLine, RiSunLine,
 } from 'react-icons/ri'
 import './SettingsPage.css'
 
@@ -34,13 +34,14 @@ function useSetting(key, defaultValue) {
 }
 
 // ── Reusable primitives ──────────────────────────────────────────────────────
-function SettingToggle({ value, onChange }) {
+function SettingToggle({ value, onChange, disabled = false }) {
   return (
     <button
       type="button"
       className={`setting-toggle${value ? ' on' : ''}`}
       onClick={() => onChange(!value)}
       aria-pressed={value}
+      disabled={disabled}
     >
       <span className="setting-toggle-thumb" />
     </button>
@@ -217,6 +218,113 @@ function HomeFeedSection() {
   )
 }
 
+// ── Server-backed push notification preferences ─────────────────────────────
+const PUSH_PREF_ROWS = [
+  { key: 'gameStart',     label: 'Game start alerts', desc: 'When a Chicago team game starts within 30 minutes',           icon: RiFootballLine },
+  { key: 'severeWeather', label: 'Severe weather',    desc: 'Thunderstorms, tornadoes, squalls, or winds over 40 mph',     icon: RiCloudLine    },
+  { key: 'greatLakeDay',  label: 'Great lake days',   desc: 'Morning heads-up when Lake Michigan conditions score 80+',    icon: RiSunLine      },
+  { key: 'lineDelays',    label: 'L line delays',     desc: 'Active CTA alerts reporting delays on the L',                 icon: RiSubwayLine   },
+]
+
+function PushNotificationsCard({ onSaved }) {
+  const supported = typeof Notification !== 'undefined'
+    && 'serviceWorker' in navigator
+    && 'PushManager' in window
+  const [permission, setPermission] = useState(() => (supported ? Notification.permission : 'unsupported'))
+  const [endpoint,   setEndpoint]   = useState(null)
+  const [prefs,      setPrefs]      = useState({})
+
+  const hydrate = useCallback(async () => {
+    if (!supported) return
+    try {
+      const reg = await navigator.serviceWorker.ready
+      const sub = await reg.pushManager.getSubscription()
+      if (!sub) { setEndpoint(null); return }
+      setEndpoint(sub.endpoint)
+      const r = await fetch(`${API}/api/push/prefs?endpoint=${encodeURIComponent(sub.endpoint)}`)
+      if (r.ok) {
+        const data = await r.json()
+        setPrefs(data.prefs || {})
+      }
+    } catch { /* backend unreachable — toggles stay disabled */ }
+  }, [supported])
+
+  useEffect(() => { hydrate() }, [hydrate])
+
+  const setPref = (key) => async (value) => {
+    const next = { ...prefs, [key]: value }
+    setPrefs(next)
+    onSaved?.()
+    try {
+      await fetch(`${API}/api/push/prefs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint, prefs: next }),
+      })
+    } catch { /* keep optimistic state */ }
+  }
+
+  const requestPermission = async () => {
+    if (!supported) return
+    try {
+      const p = await Notification.requestPermission()
+      setPermission(p)
+      if (p === 'granted') hydrate()
+    } catch {}
+  }
+
+  if (!supported) {
+    return (
+      <SettingCard title="Notifications">
+        <div className="push-perm-row">
+          <span className="push-perm-label">Permission</span>
+          <span className="env-badge missing">Unsupported</span>
+        </div>
+        <div className="setting-desc">
+          This browser does not support the Notification API — push alerts are unavailable.
+        </div>
+      </SettingCard>
+    )
+  }
+
+  return (
+    <SettingCard title="Notifications">
+      <div className="push-perm-row">
+        <span className="push-perm-label">Permission</span>
+        {permission === 'granted' ? (
+          <span className="hud-chip live"><span className="dot" />Granted</span>
+        ) : permission === 'denied' ? (
+          <span className="hud-chip err"><span className="dot" />Denied</span>
+        ) : (
+          <span className="hud-chip"><span className="dot" />Not requested</span>
+        )}
+        {permission !== 'granted' && (
+          <button
+            type="button"
+            className="btn-accent-sm push-enable-btn"
+            onClick={requestPermission}
+            disabled={permission === 'denied'}
+          >
+            <RiBellLine size={12} /> Enable notifications
+          </button>
+        )}
+      </div>
+
+      {PUSH_PREF_ROWS.map(({ key, label, desc, icon }) => (
+        <SettingRow key={key} label={label} description={desc} icon={icon}>
+          <SettingToggle
+            value={prefs[key] !== false}
+            onChange={setPref(key)}
+            disabled={!endpoint}
+          />
+        </SettingRow>
+      ))}
+
+      {!endpoint && <div className="push-hint">enable notifications first</div>}
+    </SettingCard>
+  )
+}
+
 function NotificationsSection() {
   const [transit,  setTransit]  = useSetting('chi_notif_transit',  true)
   const [weather,  setWeather]  = useSetting('chi_notif_weather',  true)
@@ -238,6 +346,8 @@ function NotificationsSection() {
           </div>
         </div>
       )}
+
+      <PushNotificationsCard onSaved={flash} />
 
       <SettingCard title="Push Alerts">
         <SettingRow label="CTA Major Disruptions" description="Alert when a train line has a significant service gap" icon={RiSubwayLine}>

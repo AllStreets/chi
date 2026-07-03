@@ -6,6 +6,7 @@ import useMapFocus from '../hooks/useMapFocus'
 import { addFavorite, removeFavorite, addVisited, removeVisited } from '../hooks/useMe'
 import MapPlaceholder from '../components/MapPlaceholder'
 import { makeMapPin } from '../utils/mapIcons'
+import { handleGetMeThereClick } from '../utils/nearestStation'
 import './NightlifePage.css'
 
 // Inline SVG icon components — exact shapes for each category
@@ -124,12 +125,14 @@ export default function NightlifePage() {
 
       map.on('click', 'nl-icons', e => {
         const { name, category, address } = e.features[0].properties
+        const [lon, lat] = e.features[0].geometry.coordinates
         new mapboxgl.Popup({ closeButton: false, offset: 16 })
           .setLngLat(e.features[0].geometry.coordinates)
           .setHTML(
             `<strong>${name}</strong>` +
             (address  ? `<div style="color:#7e8aa3;font-size:11px;margin:3px 0 2px">${address}</div>` : '') +
-            (category ? `<small>· ${category}</small>` : '')
+            (category ? `<small>· ${category}</small>` : '') +
+            `<div class="gmt-slot" data-lat="${lat}" data-lon="${lon}"><button class="gmt-btn">◈ GET ME THERE</button></div>`
           )
           .addTo(map)
       })
@@ -139,6 +142,12 @@ export default function NightlifePage() {
   })
 
   useMapFocus(mapRef)
+
+  // "Get me there" — one delegated listener handles every popup's button
+  useEffect(() => {
+    document.addEventListener('click', handleGetMeThereClick)
+    return () => document.removeEventListener('click', handleGetMeThereClick)
+  }, [])
 
   // Update icons whenever places change — source existence check replaces isStyleLoaded()
   useEffect(() => {

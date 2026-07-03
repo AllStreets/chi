@@ -248,14 +248,33 @@ function addNeighborhoodLayers(map, data) {
     type: 'fill',
     slot: 'middle',
     source: 'neighborhood-boundaries',
-    paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.15 },
+    paint: {
+      'fill-color': ['get', 'color'],
+      // Readable at overview, then fades so the 3D city owns the close-up
+      'fill-opacity': [
+        'interpolate', ['linear'], ['zoom'],
+        10, 0.26,
+        13.5, 0.16,
+        15, 0.06,
+        16, 0.02,
+      ],
+    },
   })
   map.addLayer({
     id: 'neighborhood-line',
     type: 'line',
     slot: 'middle',
     source: 'neighborhood-boundaries',
-    paint: { 'line-color': ['get', 'color'], 'line-opacity': 0.5, 'line-width': 1.5 },
+    paint: {
+      'line-color': ['get', 'color'],
+      'line-opacity': [
+        'interpolate', ['linear'], ['zoom'],
+        10, 0.65,
+        15, 0.3,
+        16, 0.12,
+      ],
+      'line-width': 1.5,
+    },
   })
 }
 

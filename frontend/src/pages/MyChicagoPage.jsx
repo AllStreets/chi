@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { RiHeartFill, RiCheckboxCircleLine, RiDeleteBinLine, RiPencilLine, RiFileTextLine, RiRouteLine } from 'react-icons/ri'
+import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
 import './MyChicagoPage.css'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -51,6 +52,100 @@ function useMe() {
   return { me, loading, deleteFavorite, deleteVisited, saveNote }
 }
 
+// ── Itinerary mini-map ─────────────────────────────────────────────
+function routeStopsGeojson(places) {
+  return {
+    type: 'FeatureCollection',
+    features: places.map((p, i) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [Number(p.lon), Number(p.lat)] },
+      properties: { num: String(i + 1), name: p.place_name },
+    })),
+  }
+}
+
+function routeLineGeojson(places) {
+  return {
+    type: 'FeatureCollection',
+    features: places.length > 1 ? [{
+      type: 'Feature',
+      geometry: { type: 'LineString', coordinates: places.map(p => [Number(p.lon), Number(p.lat)]) },
+      properties: {},
+    }] : [],
+  }
+}
+
+function fitRouteBounds(map, places) {
+  if (places.length < 1) return
+  const bounds = new mapboxgl.LngLatBounds()
+  places.forEach(p => bounds.extend([Number(p.lon), Number(p.lat)]))
+  map.fitBounds(bounds, { padding: 40, maxZoom: 15, duration: 600 })
+}
+
+function RouteMiniMap({ places }) {
+  const placesRef = useRef(places)
+  placesRef.current = places
+
+  const { containerRef, mapRef } = useAtlasMap({
+    center: [-87.6172, 41.8921], // Streeterville
+    zoom: 12,
+    onLoad: (map) => {
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#45d8ff'
+
+      map.addSource('route-line', { type: 'geojson', data: routeLineGeojson(placesRef.current) })
+      map.addSource('route-stops', { type: 'geojson', data: routeStopsGeojson(placesRef.current) })
+
+      map.addLayer({
+        id: 'route-line', type: 'line', source: 'route-line',
+        layout: { 'line-cap': 'round' },
+        paint: { 'line-color': accent, 'line-width': 2, 'line-dasharray': [2, 2.5], 'line-opacity': 0.75 },
+      })
+      map.addLayer({
+        id: 'route-stops', type: 'circle', source: 'route-stops',
+        paint: {
+          'circle-radius': 11, 'circle-color': accent,
+          'circle-stroke-color': '#04121a', 'circle-stroke-width': 2,
+        },
+      })
+      map.addLayer({
+        id: 'route-stop-nums', type: 'symbol', source: 'route-stops',
+        layout: {
+          'text-field': ['get', 'num'],
+          'text-size': 11,
+          'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
+          'text-allow-overlap': true,
+        },
+        paint: { 'text-color': '#ffffff' },
+      })
+
+      map.on('click', 'route-stops', e => {
+        const el = document.createElement('div')
+        el.className = 'mc-map-popup'
+        el.textContent = e.features[0].properties.name
+        new mapboxgl.Popup({ closeButton: false })
+          .setLngLat(e.features[0].geometry.coordinates)
+          .setDOMContent(el)
+          .addTo(map)
+      })
+      map.on('mouseenter', 'route-stops', () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', 'route-stops', () => { map.getCanvas().style.cursor = '' })
+
+      fitRouteBounds(map, placesRef.current)
+    },
+  })
+
+  // Refresh data + refit when the saved places change after map init
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.getSource('route-stops')) return
+    map.getSource('route-stops').setData(routeStopsGeojson(places))
+    map.getSource('route-line').setData(routeLineGeojson(places))
+    fitRouteBounds(map, places)
+  }, [places, mapRef])
+
+  return <div ref={containerRef} className="mc-route-map" />
+}
+
 function formatDate(ts) {
   if (!ts) return ''
   const d = new Date(ts * 1000)
@@ -67,6 +162,15 @@ export default function MyChicagoPage() {
     try { return JSON.parse(localStorage.getItem('chicago_day_plan') || '[]') }
     catch { return [] }
   })
+
+  // Favorites that carry coordinates (lat/lon are nullable in /api/me data)
+  const mappable = useMemo(
+    () => (me.favorites || []).filter(f =>
+      f.lat != null && f.lon != null &&
+      Number.isFinite(Number(f.lat)) && Number.isFinite(Number(f.lon))
+    ),
+    [me.favorites]
+  )
 
   function savePlan(newPlan) {
     setPlan(newPlan)
@@ -228,6 +332,30 @@ export default function MyChicagoPage() {
             <div className="mc-empty">Click a favorite above to add it to your plan</div>
           )}
         </div>
+      )}
+
+      {/* Itinerary mini-map */}
+      {!loading && (tab === 'favorites' || tab === 'plan') && (
+        <section className="mc-route-panel hud-panel hud-corners hud-rise">
+          <span className="hud-label mc-route-eyebrow">ROUTE <span className="slash">/</span> MY DAY</span>
+          {!MAPBOX_TOKEN ? (
+            <>
+              <div className="mc-empty mc-route-empty">save places from Food, Nightlife or Explore to build your route</div>
+              <div className="mc-route-hint">map offline</div>
+            </>
+          ) : mappable.length === 0 ? (
+            <div className="mc-empty mc-route-empty">save places from Food, Nightlife or Explore to build your route</div>
+          ) : (
+            <>
+              <RouteMiniMap places={mappable} />
+              {mappable.length < (me.favorites?.length ?? 0) && (
+                <div className="mc-route-hint">
+                  {mappable.length} of {me.favorites.length} saved places have map locations
+                </div>
+              )}
+            </>
+          )}
+        </section>
       )}
 
       {/* Write note modal */}

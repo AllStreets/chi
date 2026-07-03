@@ -1,0 +1,23 @@
+{
+  "name": "CHI ATLAS — Chicago City Intelligence",
+  "short_name": "CHI ATLAS",
+  "description": "Cinematic city intelligence for Chicago: live transit, food, nightlife, sports, weather, and neighborhoods.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030509",
+  "theme_color": "#030509",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -4,16 +4,19 @@ const app = require('../server')
 global.fetch = jest.fn()
 beforeEach(() => fetch.mockClear())
 
+// lib/weather.js fetches current conditions AND the forecast in parallel, so
+// the mock must satisfy both calls (list: [] covers the forecast shape).
 const OWM_RESPONSE = {
   main: { temp: 285, feels_like: 282, humidity: 65 },
   wind: { speed: 5.2, deg: 270 },
   weather: [{ description: 'partly cloudy', icon: '02d' }],
-  name: 'Chicago'
+  name: 'Chicago',
+  list: []
 }
 
 describe('GET /api/weather', () => {
   it('returns current conditions', async () => {
-    fetch.mockResolvedValueOnce({ ok: true, json: async () => OWM_RESPONSE })
+    fetch.mockResolvedValue({ ok: true, json: async () => OWM_RESPONSE })
     const res = await request(app).get('/api/weather')
     expect(res.status).toBe(200)
     expect(res.body).toHaveProperty('temp')
@@ -24,7 +27,7 @@ describe('GET /api/weather', () => {
 
 describe('GET /api/lake', () => {
   it('returns a lake conditions object with a niceness score', async () => {
-    fetch.mockResolvedValueOnce({ ok: true, json: async () => OWM_RESPONSE })
+    fetch.mockResolvedValue({ ok: true, json: async () => OWM_RESPONSE })
     const res = await request(app).get('/api/lake')
     expect(res.status).toBe(200)
     expect(res.body).toHaveProperty('niceScore')
@@ -34,7 +37,7 @@ describe('GET /api/lake', () => {
   })
 
   it('returns niceLabel string', async () => {
-    fetch.mockResolvedValueOnce({ ok: true, json: async () => OWM_RESPONSE })
+    fetch.mockResolvedValue({ ok: true, json: async () => OWM_RESPONSE })
     const res = await request(app).get('/api/lake')
     expect(res.body).toHaveProperty('niceLabel')
     expect(typeof res.body.niceLabel).toBe('string')

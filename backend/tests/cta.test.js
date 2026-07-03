@@ -12,9 +12,12 @@ describe('GET /api/cta/trains', () => {
       ok: true,
       json: async () => ({
         ctatt: {
-          train: [
-            { rn: '101', lat: '41.87', lon: '-87.63', heading: '90', rt: 'Red', nextStaNm: 'Grand', prdt: '20260323 12:00:00', arrT: '20260323 12:02:00' }
-          ]
+          route: [{
+            '@name': 'red',
+            train: [
+              { rn: '101', lat: '41.87', lon: '-87.63', heading: '90', nextStaNm: 'Grand', prdt: '20260323 12:00:00', arrT: '20260323 12:02:00' }
+            ],
+          }],
         }
       })
     })

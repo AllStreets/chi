@@ -6,6 +6,7 @@ import useMapFocus from '../hooks/useMapFocus'
 import { addFavorite, removeFavorite, addVisited, removeVisited } from '../hooks/useMe'
 import MapPlaceholder from '../components/MapPlaceholder'
 import { makeMapPin } from '../utils/mapIcons'
+import { handleGetMeThereClick } from '../utils/nearestStation'
 import './FoodPage.css'
 
 const TYPES = ['all', 'restaurants', 'bars', 'cafes', 'pizza', 'sushi', 'tacos', 'brunch']
@@ -89,12 +90,14 @@ export default function FoodPage() {
 
       map.on('click', 'place-icons', e => {
         const { name, rating, price, category, address } = e.features[0].properties
+        const [lon, lat] = e.features[0].geometry.coordinates
         new mapboxgl.Popup({ closeButton: false, offset: 16 })
           .setLngLat(e.features[0].geometry.coordinates)
           .setHTML(
             `<strong>${name}</strong>` +
             (address ? `<div style="color:#7e8aa3;font-size:11px;margin:3px 0 2px">${address}</div>` : '') +
-            `<small>${rating ? `${rating} ★  ` : ''}${price || ''}${category ? ` · ${category}` : ''}</small>`
+            `<small>${rating ? `${rating} ★  ` : ''}${price || ''}${category ? ` · ${category}` : ''}</small>` +
+            `<div class="gmt-slot" data-lat="${lat}" data-lon="${lon}"><button class="gmt-btn">◈ GET ME THERE</button></div>`
           )
           .addTo(map)
       })
@@ -104,6 +107,12 @@ export default function FoodPage() {
   })
 
   useMapFocus(mapRef)
+
+  // "Get me there" — one delegated listener handles every popup's button
+  useEffect(() => {
+    document.addEventListener('click', handleGetMeThereClick)
+    return () => document.removeEventListener('click', handleGetMeThereClick)
+  }, [])
 
   // Update markers whenever places changes
   useEffect(() => {

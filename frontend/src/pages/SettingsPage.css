@@ -794,3 +794,41 @@
   color: var(--text-faint);
   font-family: var(--font-ui);
 }
+
+/* ── Push notification preferences ───────────────────────────────────────────── */
+.push-perm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.push-perm-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-right: auto;
+}
+
+.push-perm-row .push-enable-btn {
+  margin-top: 0;
+}
+
+.push-hint {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-faint);
+  letter-spacing: 0.05em;
+  margin-top: 10px;
+}
+
+.setting-toggle:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { RiBuildingLine, RiLeafLine, RiAncientGateLine, RiLandscapeLine, RiBrainLine, RiHeartLine, RiHeartFill, RiCheckboxCircleLine, RiMapPinLine } from 'react-icons/ri'
 import { addFavorite, removeFavorite, addVisited, removeVisited } from '../hooks/useMe'
+import { nearestStation, fetchArrivals, LINE_COLORS } from '../utils/nearestStation'
 import './ExplorePage.css'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -133,10 +134,58 @@ function AIChatBox() {
   )
 }
 
+// Inline "Get me there" panel — nearest L station + next arrivals
+function TransitPanel({ lat, lon }) {
+  const [state, setState] = useState({ status: 'loading' })
+
+  useEffect(() => {
+    let live = true
+    setState({ status: 'loading' })
+    ;(async () => {
+      try {
+        const info = await nearestStation(lat, lon)
+        if (!info) throw new Error('no stations')
+        const arrivals = await fetchArrivals(info.station.mapId).catch(() => [])
+        if (live) setState({ status: 'ready', info, arrivals })
+      } catch {
+        if (live) setState({ status: 'error' })
+      }
+    })()
+    return () => { live = false }
+  }, [lat, lon])
+
+  if (state.status === 'loading') return <div className="explore-transit"><div className="gmt-status">…locating station</div></div>
+  if (state.status === 'error')   return <div className="explore-transit"><div className="gmt-status gmt-error">transit data unavailable</div></div>
+
+  const { info, arrivals } = state
+  const { station, walkMin } = info
+  return (
+    <div className="explore-transit">
+      <div className="gmt-station">
+        <span className="gmt-station-name">{station.name}</span>
+        {(station.lines || []).map(l => (
+          <span key={l} className="gmt-dot" style={{ background: LINE_COLORS[l] || '#64748b' }} />
+        ))}
+      </div>
+      <div className="gmt-walk">◈ {walkMin} MIN WALK</div>
+      <div className="gmt-nearest">⊙ nearest L: {station.name} · {walkMin} min walk</div>
+      {arrivals.length === 0 && <div className="gmt-arrival gmt-none">no upcoming arrivals</div>}
+      {arrivals.map((a, i) => (
+        <div key={i} className="gmt-arrival">
+          <span className="gmt-bullet" style={{ background: LINE_COLORS[a.line] || '#64748b' }} />
+          {a.line} → {a.destination} · {a.minutes <= 1 ? 'Due' : `${a.minutes} min`}
+          {a.isDelayed && <span className="gmt-delay"> DLY</span>}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function ExplorePage() {
   const [category, setCategory] = useState('all')
   const [saved, setSaved] = useState({})
   const [tourMode, setTourMode] = useState(false)
+  const [transitOpen, setTransitOpen] = useState(null)  // landmark name — one panel at a time
   const filtered = category === 'all' ? LANDMARKS : LANDMARKS.filter(l => l.category === category)
 
   return (
@@ -199,6 +248,15 @@ export default function ExplorePage() {
               <span className="explore-tip-label">TIP</span>
               {l.tip}
             </div>
+            <div className="explore-card-footer">
+              <button
+                className={`hud-pill explore-gmt-btn${transitOpen === l.name ? ' active' : ''}`}
+                onClick={() => setTransitOpen(o => (o === l.name ? null : l.name))}
+              >
+                ◈ GET ME THERE
+              </button>
+            </div>
+            {transitOpen === l.name && <TransitPanel lat={l.lat} lon={l.lon} />}
             <div className="explore-card-actions">
               <button
                 className={`explore-action-btn${saved[l.name] === 'favorite' ? ' active' : ''}`}

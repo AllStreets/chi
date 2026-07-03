@@ -67,6 +67,8 @@ if (require.main === module) {
   app.listen(port, () => console.log(`Backend on :${port}`))
   // Record train positions for the Transit time-machine (not during tests)
   require('./lib/ctaRecorder').start()
+  // Push notification condition checker (game starts, weather, lake, CTA delays)
+  require('./lib/alertEngine').start()
 }
 
 module.exports = app

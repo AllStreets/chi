@@ -231,6 +231,54 @@
 }
 .mc-plan-actions button:disabled { opacity: 0.3; cursor: default; }
 
+/* ── Itinerary mini-map ──────────────────────────────────────────── */
+.mc-route-panel {
+  max-width: 620px;
+  margin-top: 22px;
+  padding: 16px 18px 18px;
+}
+
+.mc-route-eyebrow {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.mc-route-map {
+  height: 320px;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(3, 5, 9, 0.65);
+}
+
+.mc-route-empty { padding: 10px 0 2px; }
+
+.mc-route-hint {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-top: 10px;
+}
+.mc-route-hint::before { content: '> '; color: var(--accent); }
+
+/* Themed Mapbox popup for route stops */
+.mychicago-page .mapboxgl-popup-content {
+  background: var(--panel-solid);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--font-ui);
+  box-shadow: var(--shadow-panel);
+}
+.mychicago-page .mapboxgl-popup-tip { border-top-color: var(--border-strong); }
+
+.mc-map-popup {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
 /* ── Modals ──────────────────────────────────────────────────────── */
 .mc-modal-overlay {
   position: fixed;

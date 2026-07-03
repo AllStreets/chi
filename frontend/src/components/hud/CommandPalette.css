@@ -134,6 +134,79 @@
   animation: hud-pulse 1.4s ease-in-out infinite;
 }
 
+/* Ask ATLAS pinned row — hairline-separated, always last */
+.cmdk-ask-row {
+  border-top: 1px solid var(--border);
+  margin-top: 5px;
+  padding-top: 5px;
+  list-style: none;
+}
+
+.cmdk-ask-row:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Answer mode — terminal-style concierge panel */
+.cmdk-answer {
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cmdk-answer-prefix { color: var(--accent); }
+
+.cmdk-answer-q {
+  color: var(--text-faint);
+  margin-bottom: 10px;
+}
+
+.cmdk-answer-thinking {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+  animation: hud-pulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmdk-answer-thinking { animation: none; }
+}
+
+.cmdk-answer-text {
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.cmdk-answer-tools {
+  margin-top: 12px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+}
+
+.cmdk-answer-back {
+  margin-top: 14px;
+  padding: 5px 10px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.cmdk-answer-back:hover {
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.35);
+}
+
 .cmdk-footer {
   display: flex;
   align-items: center;

@@ -6,7 +6,7 @@ import {
   RiMoonLine, RiMoonClearLine, RiFootballLine, RiCalendarEventLine, RiCloudLine,
   RiCommunityLine, RiUser3Line, RiAlertLine, RiHeartPulseLine,
   RiNewspaperLine, RiLineChartLine, RiSettings3Line, RiSearchLine,
-  RiMapPin2Line,
+  RiMapPin2Line, RiSparklingLine,
 } from 'react-icons/ri'
 import './CommandPalette.css'
 
@@ -46,8 +46,16 @@ export default function CommandPalette() {
   const [cursor, setCursor] = useState(0)
   const [apiResults, setApiResults] = useState([])
   const [searching, setSearching] = useState(false)
+  // Ask ATLAS — 'results' shows nav + deep search, 'answer' shows the concierge panel
+  const [mode, setMode] = useState('results')
+  const [ask, setAsk] = useState(null) // { question, status: 'thinking'|'done'|'error', answer, toolsUsed }
+  const [typed, setTyped] = useState('')
+  const modeRef = useRef('results')
+  const askSeq = useRef(0)
   const inputRef = useRef(null)
   const navigate = useNavigate()
+
+  useEffect(() => { modeRef.current = mode }, [mode])
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -100,12 +108,29 @@ export default function CommandPalette() {
       })
   }, [results, apiResults])
 
-  const totalCount = results.length + sections.reduce((n, s) => n + s.items.length, 0)
+  // Ask ATLAS pinned row — always the LAST index in the flat cursor
+  const showAsk = query.trim().length >= 3
+  const baseCount = results.length + sections.reduce((n, s) => n + s.items.length, 0)
+  const askIndex = baseCount
+  const totalCount = baseCount + (showAsk ? 1 : 0)
 
   const close = useCallback(() => {
     setOpen(false)
     setQuery('')
     setCursor(0)
+    setMode('results')
+    setAsk(null)
+    setTyped('')
+    askSeq.current++
+  }, [])
+
+  // Answer mode → results mode (← back button and Escape)
+  const backToResults = useCallback(() => {
+    setMode('results')
+    setAsk(null)
+    setTyped('')
+    askSeq.current++
+    inputRef.current?.focus()
   }, [])
 
   useEffect(() => {
@@ -114,7 +139,13 @@ export default function CommandPalette() {
         e.preventDefault()
         setOpen(o => !o)
       } else if (e.key === 'Escape') {
-        close()
+        // In answer mode Escape steps back to results; from results it closes
+        if (modeRef.current === 'answer') {
+          e.preventDefault()
+          backToResults()
+        } else {
+          close()
+        }
       }
     }
     const openHandler = () => setOpen(true)
@@ -124,17 +155,62 @@ export default function CommandPalette() {
       window.removeEventListener('keydown', handler)
       window.removeEventListener('chi:open-palette', openHandler)
     }
-  }, [close])
+  }, [close, backToResults])
 
   useEffect(() => {
     if (open) inputRef.current?.focus()
   }, [open])
+
+  // Typewriter reveal (~20ms/char); instant under prefers-reduced-motion
+  useEffect(() => {
+    if (mode !== 'answer' || ask?.status !== 'done') return
+    const text = ask.answer
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+      setTyped(text)
+      return
+    }
+    let i = 0
+    const timer = setInterval(() => {
+      i++
+      setTyped(text.slice(0, i))
+      if (i >= text.length) clearInterval(timer)
+    }, 20)
+    return () => clearInterval(timer)
+  }, [mode, ask])
 
   if (!open) return null
 
   const go = (to) => {
     navigate(to)
     close()
+  }
+
+  const startAsk = () => {
+    const question = query.trim()
+    if (!question) return
+    const seq = ++askSeq.current
+    setMode('answer')
+    setAsk({ question, status: 'thinking', answer: '', toolsUsed: [] })
+    setTyped('')
+    fetch(`${API}/api/ai/concierge`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then(data => {
+        if (askSeq.current !== seq) return
+        setAsk({
+          question,
+          status: 'done',
+          answer: data?.answer || '',
+          toolsUsed: Array.isArray(data?.toolsUsed) ? data.toolsUsed : [],
+        })
+      })
+      .catch(() => {
+        if (askSeq.current !== seq) return
+        setAsk({ question, status: 'error', answer: '', toolsUsed: [] })
+      })
   }
 
   const selectApiResult = (r) => {
@@ -161,9 +237,11 @@ export default function CommandPalette() {
         return
       }
     }
+    if (showAsk && index === askIndex) startAsk()
   }
 
   const onKeyDown = (e) => {
+    if (mode === 'answer') return
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       setCursor(c => Math.min(c + 1, Math.max(totalCount - 1, 0)))
@@ -187,12 +265,40 @@ export default function CommandPalette() {
             className="cmdk-input"
             placeholder="Search pages, places, stations…"
             value={query}
-            onChange={e => { setQuery(e.target.value); setCursor(0) }}
+            onChange={e => {
+              setQuery(e.target.value)
+              setCursor(0)
+              if (mode === 'answer') backToResults()
+            }}
             onKeyDown={onKeyDown}
             aria-label="Command palette search"
           />
           <span className="hud-kbd">ESC</span>
         </div>
+        {mode === 'answer' ? (
+          <div className="cmdk-answer" role="status" aria-live="polite">
+            <div className="cmdk-answer-q">
+              <span className="cmdk-answer-prefix">&gt;</span> {ask?.question}
+            </div>
+            {ask?.status === 'thinking' && (
+              <div className="cmdk-answer-thinking">THINKING…</div>
+            )}
+            {ask?.status === 'error' && (
+              <div className="cmdk-answer-text">
+                <span className="cmdk-answer-prefix">&gt;</span> concierge offline — check OPENAI_API_KEY
+              </div>
+            )}
+            {ask?.status === 'done' && (
+              <div className="cmdk-answer-text">
+                <span className="cmdk-answer-prefix">&gt;</span> {typed}
+              </div>
+            )}
+            {ask?.status === 'done' && ask.toolsUsed.length > 0 && (
+              <div className="cmdk-answer-tools">TOOLS: {ask.toolsUsed.join(' · ')}</div>
+            )}
+            <button className="cmdk-answer-back" onClick={backToResults}>← back</button>
+          </div>
+        ) : (
         <ul className="cmdk-list">
           {totalCount === 0 && !searching && (
             <li className="cmdk-empty">No matches — try “transit” or “food”</li>
@@ -238,7 +344,21 @@ export default function CommandPalette() {
             )
           })}
           {searching && <li className="cmdk-searching">SEARCHING…</li>}
+          {showAsk && (
+            <li className="cmdk-ask-row">
+              <button
+                className={`cmdk-item${askIndex === cursor ? ' selected' : ''}`}
+                onMouseEnter={() => setCursor(askIndex)}
+                onClick={startAsk}
+              >
+                <RiSparklingLine className="cmdk-item-icon" />
+                <span className="cmdk-item-label">Ask ATLAS: “{query.trim()}”</span>
+                <span className="cmdk-item-hint">AI</span>
+              </button>
+            </li>
+          )}
         </ul>
+        )}
         <div className="cmdk-footer">
           <span><span className="hud-kbd">↑↓</span> navigate</span>
           <span><span className="hud-kbd">↵</span> open</span>

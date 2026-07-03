@@ -287,6 +287,104 @@
 .food-page .mapboxgl-popup-anchor-left .mapboxgl-popup-tip { border-right-color: var(--border-strong); }
 .food-page .mapboxgl-popup-anchor-right .mapboxgl-popup-tip { border-left-color: var(--border-strong); }
 
+/* ── "Get me there" transit slot inside popups ───────────────────── */
+.food-page .gmt-slot {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.food-page .gmt-btn {
+  appearance: none;
+  width: 100%;
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.food-page .gmt-btn:hover {
+  background: rgba(var(--accent-rgb), 0.16);
+  box-shadow: var(--glow-accent);
+}
+
+.food-page .gmt-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.food-page .gmt-status.gmt-error { color: var(--red); }
+
+.food-page .gmt-station {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.food-page .gmt-station-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-right: 3px;
+}
+.food-page .gmt-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.food-page .gmt-walk {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  margin-top: 3px;
+}
+
+.food-page .gmt-nearest {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  margin: 4px 0 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.food-page .gmt-arrival {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text);
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+.food-page .gmt-arrival:last-child { border-bottom: none; padding-bottom: 0; }
+.food-page .gmt-arrival.gmt-none { color: var(--text-faint); }
+
+.food-page .gmt-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.food-page .gmt-delay {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--red);
+}
+
 @media (max-width: 720px) {
   .food-panel { width: 264px; top: 12px; left: 12px; max-height: calc(100vh - 24px); }
   .food-hints { display: none; }
