@@ -56,7 +56,24 @@ export default function useAtlasMap({
     const ro = new ResizeObserver(() => mapRef.current?.resize())
     ro.observe(containerRef.current)
 
+    // Arrow up/down = camera pitch — the axis drag/zoom/rotate don't cover.
+    // Mapbox's own keyboard handler owns arrows only when the canvas is
+    // focused; this works page-wide (but never while typing in a field).
+    const onPitchKey = (e) => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
+      const t = e.target
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
+      const m = mapRef.current
+      if (!m || !m.getPitch) return
+      e.preventDefault()
+      const delta = e.key === 'ArrowUp' ? 5 : -5
+      const next = Math.min(85, Math.max(0, m.getPitch() + delta))
+      m.easeTo({ pitch: next, duration: 120 })
+    }
+    window.addEventListener('keydown', onPitchKey)
+
     return () => {
+      window.removeEventListener('keydown', onPitchKey)
       ro.disconnect()
       cancelAnimationFrame(rafRef.current)
       map.remove()

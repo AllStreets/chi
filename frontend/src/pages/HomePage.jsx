@@ -308,7 +308,21 @@ export default function HomePage() {
   const navigate = useNavigate()
   const orbitRef = useRef(false)
   const [orbit, setOrbit] = useState(false)
+  const [atlasMode, setAtlasMode] = useState(false)
   const [preset, setPreset] = useState(solarPreset)
+
+  // Atlas Mode — ambient chrome-free orbit. ESC exits; body class hides shell.
+  useEffect(() => {
+    document.body.classList.toggle('atlas-mode', atlasMode)
+    if (!atlasMode) return () => document.body.classList.remove('atlas-mode')
+    setOrbit(true)
+    const onKey = (e) => { if (e.key === 'Escape') setAtlasMode(false) }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.classList.remove('atlas-mode')
+    }
+  }, [atlasMode])
   const GLIDE_MS = 8000
 
   useEffect(() => { orbitRef.current = orbit }, [orbit])
@@ -654,7 +668,13 @@ export default function HomePage() {
       <div className="home-mode-pills">
         <button className={`hud-pill${orbit ? '' : ' active'}`} onClick={() => setOrbit(false)}>Free</button>
         <button className={`hud-pill${orbit ? ' active' : ''}`} onClick={() => setOrbit(true)}>Orbit</button>
+        <button className="hud-pill" onClick={() => setAtlasMode(true)} title="Ambient cinematic view — ESC to exit">◈ Atlas</button>
       </div>
+      {atlasMode && (
+        <button className="atlas-exit hud-chip" onClick={() => setAtlasMode(false)}>
+          <span className="hud-kbd">ESC</span> exit atlas mode
+        </button>
+      )}
       <div className="home-light-pills">
         {LIGHT_PRESETS.map(p => (
           <button
@@ -669,6 +689,7 @@ export default function HomePage() {
       <div className="home-hints">
         <span><span className="hud-kbd">Drag</span> rotate</span>
         <span><span className="hud-kbd">Scroll</span> zoom</span>
+        <span><span className="hud-kbd">↑↓</span> pitch</span>
         <span><span className="hud-kbd">⌘K</span> search</span>
       </div>
       <IntelFeed

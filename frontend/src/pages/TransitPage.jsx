@@ -503,6 +503,7 @@ export default function TransitPage() {
           )}
           <span><span className="hud-kbd">Drag</span> rotate</span>
           <span><span className="hud-kbd">Scroll</span> zoom</span>
+          <span><span className="hud-kbd">↑↓</span> pitch</span>
           <span><span className="hud-kbd">⌘K</span> search</span>
         </div>
       )}

@@ -164,6 +164,38 @@
   padding: 4px 10px;
 }
 
+/* Atlas Mode — ambient chrome-free orbit */
+body.atlas-mode .sidebar { transform: translateX(-100%); }
+body.atlas-mode .main-content { margin-left: 0; }
+body.atlas-mode .home-map-overlay,
+body.atlas-mode .home-search-pill,
+body.atlas-mode .home-mode-pills,
+body.atlas-mode .home-light-pills,
+body.atlas-mode .home-hints,
+body.atlas-mode .intel-feed {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.atlas-exit {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 20;
+  cursor: pointer;
+  opacity: 0.35;
+  transition: opacity 0.2s;
+  animation: atlas-exit-fade 4s ease 1s both;
+}
+
+.atlas-exit:hover { opacity: 1; }
+
+@keyframes atlas-exit-fade {
+  from { opacity: 0.9; }
+  to   { opacity: 0.25; }
+}
+
 /* Bottom hint bar */
 .home-hints {
   position: absolute;
