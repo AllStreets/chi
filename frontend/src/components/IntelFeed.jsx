@@ -90,7 +90,7 @@ export default function IntelFeed({ weather, lake, trains = [], trainCount, next
             WEATHER
           </div>
           <div className="intel-card-value">
-            <span style={{color:'#60a5fa'}}>{weather.tempF ?? Math.round(weather.temp * 9/5 + 32)}°</span>
+            <span style={{color:'var(--accent)'}}>{weather.tempF ?? Math.round(weather.temp * 9/5 + 32)}°</span>
             <span style={{fontSize:'11px',color:'var(--text-muted)',marginLeft:4}}>F</span>
           </div>
           <div className="intel-card-sub">{weather.description} · Wind {Math.round((weather.wind?.speed ?? weather.wind ?? 0) * 2.237 * 10) / 10} mph</div>
@@ -138,7 +138,7 @@ export default function IntelFeed({ weather, lake, trains = [], trainCount, next
             const oppWon     = isFinal && g.oppScore     != null && g.oppScore     > g.chicagoScore
             return (
               <div key={i} className="intel-sport-row">
-                <span className="intel-sport-dot" style={{ background: g.color || '#00d4ff' }} />
+                <span className="intel-sport-dot" style={{ background: g.color || 'var(--accent)' }} />
                 <div className="intel-sport-info">
                   <span className="intel-sport-teams">
                     <span style={{ fontWeight: chicagoWon ? 700 : oppWon ? 400 : undefined, opacity: oppWon ? 0.5 : undefined }}>{g.team}</span>
@@ -150,7 +150,7 @@ export default function IntelFeed({ weather, lake, trains = [], trainCount, next
                 {(g.state === 'in' || isFinal) && g.chicagoScore != null ? (
                   <div className="intel-sport-score">
                     {g.state === 'in' && <span className="intel-sport-live-dot" />}
-                    <span className="intel-sport-score-num" style={{ color: g.color || '#00d4ff', fontWeight: chicagoWon ? 700 : undefined, opacity: oppWon ? 0.4 : undefined }}>{g.chicagoScore}</span>
+                    <span className="intel-sport-score-num" style={{ color: g.color || 'var(--accent)', fontWeight: chicagoWon ? 700 : undefined, opacity: oppWon ? 0.4 : undefined }}>{g.chicagoScore}</span>
                     <span className="intel-sport-score-dash">-</span>
                     <span className="intel-sport-score-num" style={{ fontWeight: oppWon ? 700 : undefined, opacity: chicagoWon ? 0.4 : undefined }}>{g.oppScore}</span>
                   </div>
@@ -175,7 +175,7 @@ export default function IntelFeed({ weather, lake, trains = [], trainCount, next
           <div className="intel-card-sub" style={{ paddingTop: 4 }}>Loading trains...</div>
         ) : (
           <div className="intel-cta-row">
-            <span className="intel-train-dot" style={{ background: LINE_COLORS[closestTrain.line] || '#00d4ff' }} />
+            <span className="intel-train-dot" style={{ background: LINE_COLORS[closestTrain.line] || 'var(--accent)' }} />
             <div className="intel-train-info">
               <span className="intel-train-line">{closestTrain.line ? `${LINE_NAMES[closestTrain.line] || closestTrain.line} Line` : 'CTA Train'}</span>
               <span className="intel-train-station">{closestTrain.nextStation}</span>

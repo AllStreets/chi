@@ -1,10 +1,13 @@
-# Chicago Explore
+# CHI ATLAS
 
-A city intelligence app for exploring Chicago, centered on Streeterville.
+A cinematic city-intelligence atlas for Chicago, centered on Streeterville.
+Dark mission-control HUD: glass panels, neon transit glows, mono clocks, and a
+global ⌘K command palette over live city data.
 
-**Live:** [chicago-explorer.vercel.app](https://chicago-explorer.vercel.app) — **API:** [railway.app](https://railway.app)
+Successor to [chicago-explore](https://github.com/AllStreets/chicago-explore) —
+same feature set, fully overhauled design.
 
-Repo: https://github.com/AllStreets/chicago-explore
+Repo: https://github.com/AllStreets/chi
 
 ---
 
@@ -12,9 +15,9 @@ Repo: https://github.com/AllStreets/chicago-explore
 
 | Route | Page | Description |
 |---|---|---|
-| `/` | Home | 3D Mapbox map centered on Streeterville — live CTA train dots, official team logo stadium pins (Bulls/Bears sort on top), food and nightlife icons, floating IntelFeed (weather, sports scores, tonight's event, closest train, Buzzing Now) |
+| `/` | Home | Cinematic 3D Mapbox map with intro fly-in and Orbit mode — live CTA train dots, official team logo stadium pins (Bulls/Bears sort on top), food and nightlife icons, floating glass IntelFeed (weather, sports scores, tonight's event, closest train, Buzzing Now), ⌘K search pill |
 | `/explore` | Explore Chicago | Curated landmarks by category (architecture, culture, nature, hidden) with AI guide chat |
-| `/transit` | Transit | All 8 CTA L lines with animated live train positions, line status sidebar, Divvy stations |
+| `/transit` | Transit | Tokyo-Metro-style HUD — full-bleed pitched map, floating glass line panel for all 8 CTA L lines with live per-line counts, animated train positions, Divvy stations, bus overlay |
 | `/nightlife` | Nightlife | Bars, night clubs, cocktail bars, rooftop bars, wine bars, jazz venues — Mapbox map + 7 neighborhood scene profiles including Streeterville |
 | `/food` | Food & Drink | OSM-powered restaurant map with cuisine filters (restaurants, bars, cafes, pizza, sushi, tacos, brunch) |
 | `/sports` | Sports | Cubs, Sox, Bears, Bulls, Blackhawks, Fire — live scores (refreshes every 90s), today's games, upcoming schedule |
@@ -38,9 +41,12 @@ Repo: https://github.com/AllStreets/chicago-explore
 - better-sqlite3 (SQLite — caches API responses, stores user favorites/visited)
 - Jest + Supertest
 
-**Design**
-- Background: `#060b18` · Accent: `#00d4ff`
-- Fonts: Space Grotesk (UI), JetBrains Mono (numbers/code)
+**Design — "CHI ATLAS" HUD language**
+- Canvas: `#030509` near-black · Accent: `#45d8ff` electric cyan · Secondary: `#ff3b53` Chicago red
+- Glass panels (`backdrop-filter` blur + hairline borders), film-grain overlay, vignettes on map pages
+- Fonts: Michroma (display), Archivo (UI), IBM Plex Mono (data/clocks)
+- Global ⌘K command palette; kbd-hint bars on map pages
+- Full spec: [docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md](./docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md)
 
 **External APIs**
 | API | Used For | Key Required |

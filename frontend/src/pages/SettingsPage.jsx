@@ -52,7 +52,7 @@ function SettingRow({ label, description, icon: Icon, children }) {
     <div className="setting-row">
       <div className="setting-row-left">
         <div className="setting-label">
-          {Icon && <Icon size={13} style={{ marginRight: 6, color: '#64748b', flexShrink: 0 }} />}
+          {Icon && <Icon size={13} style={{ marginRight: 6, color: 'var(--text-faint)', flexShrink: 0 }} />}
           {label}
         </div>
         {description && <div className="setting-desc">{description}</div>}
@@ -64,8 +64,8 @@ function SettingRow({ label, description, icon: Icon, children }) {
 
 function SettingCard({ title, children }) {
   return (
-    <div className="settings-card">
-      {title && <div className="settings-group-title">{title}</div>}
+    <div className="settings-card hud-panel">
+      {title && <div className="settings-group-title hud-label">{title}</div>}
       {children}
     </div>
   )
@@ -347,7 +347,7 @@ function MapDisplaySection() {
 }
 
 const ACCENT_PRESETS = [
-  { color: '#00d4ff', label: 'Cyan (default)' },
+  { color: '#45d8ff', label: 'Cyan (default)' },
   { color: '#a78bfa', label: 'Purple'          },
   { color: '#10b981', label: 'Emerald'         },
   { color: '#f59e0b', label: 'Amber'           },
@@ -355,7 +355,7 @@ const ACCENT_PRESETS = [
 ]
 
 function AppearanceSection() {
-  const [accent,     setAccent]     = useSetting('chi_ui_accent',           '#00d4ff')
+  const [accent,     setAccent]     = useSetting('chi_ui_accent',           '#45d8ff')
   const [sidebar,    setSidebar]    = useSetting('chi_ui_sidebar_default',  'expanded')
   const [density,    setDensity]    = useSetting('chi_ui_density',          'normal')
   const [animations, setAnimations] = useSetting('chi_ui_animations',       true)
@@ -453,10 +453,10 @@ function IntegrationsSection({ health, onTestHealth, healthLoading }) {
             <span className="health-card-label">API Server</span>
             <div className="health-status">
               {health ? (
-                <>
-                  <span className={`health-dot ${health.status === 'ok' ? 'ok' : 'error'}`} />
-                  <span className="health-label">{health.status === 'ok' ? 'Online' : 'Unreachable'}</span>
-                </>
+                <span className={`hud-chip${health.status === 'ok' ? ' live' : ' err'}`}>
+                  <span className="dot" />
+                  {health.status === 'ok' ? 'Online' : 'Unreachable'}
+                </span>
               ) : (
                 <span className="health-label muted">—</span>
               )}
@@ -664,14 +664,14 @@ function AboutSection({ health, onTestHealth, healthLoading }) {
     <>
       <SettingCard title="Application">
         {[
-          { key: 'Application', val: 'Chicago Explorer'                    },
+          { key: 'Application', val: 'CHI ATLAS — Chicago City Intelligence' },
           { key: 'Version',     val: 'v1.0.0'                              },
           { key: 'Frontend',    val: 'React 19 + Vite 8'                   },
           { key: 'Backend',     val: 'Express 5 + better-sqlite3'             },
           { key: 'Maps',        val: 'Mapbox GL 3'                         },
           { key: 'Data',        val: 'OpenWeatherMap · CTA · Ticketmaster · OpenStreetMap · Divvy' },
           { key: 'AI',          val: 'OpenAI GPT-4o-mini · Anthropic Claude'},
-          { key: 'Design',      val: '#060b18 · #00d4ff · Space Grotesk + JetBrains Mono' },
+          { key: 'Design',      val: '#030509 · #45d8ff · Michroma + Archivo + IBM Plex Mono' },
         ].map(({ key, val }) => (
           <div key={key} className="about-kv-row">
             <span className="about-key">{key}</span>
@@ -686,7 +686,7 @@ function AboutSection({ health, onTestHealth, healthLoading }) {
             <div style={{ flex: 1 }}>
               <div className="setting-label" style={{ fontSize: 12 }}>
                 {page}
-                <span style={{ color: '#334155', fontFamily: 'JetBrains Mono, monospace', fontSize: 10, marginLeft: 8 }}>{path}</span>
+                <span style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)', fontSize: 10, marginLeft: 8 }}>{path}</span>
               </div>
               <div className="setting-desc">{desc}</div>
             </div>
@@ -700,10 +700,10 @@ function AboutSection({ health, onTestHealth, healthLoading }) {
             <span className="health-card-label">API Server</span>
             <div className="health-status">
               {health ? (
-                <>
-                  <span className={`health-dot ${health.status === 'ok' ? 'ok' : 'error'}`} />
-                  <span className="health-label">{health.status === 'ok' ? `Online · v${health.version}` : 'Unreachable'}</span>
-                </>
+                <span className={`hud-chip${health.status === 'ok' ? ' live' : ' err'}`}>
+                  <span className="dot" />
+                  {health.status === 'ok' ? `Online · v${health.version}` : 'Unreachable'}
+                </span>
               ) : <span className="health-label muted">Not checked</span>}
             </div>
           </div>
@@ -847,12 +847,13 @@ export default function SettingsPage() {
       </aside>
 
       <div className="settings-content">
-        <div className="settings-section-header">
+        <div className="settings-section-header hud-rise">
           <div className="settings-section-icon-wrap">
-            {section && <section.Icon size={18} color="var(--accent, #00d4ff)" />}
+            {section && <section.Icon size={18} color="var(--accent, #45d8ff)" />}
           </div>
           <div>
-            <div className="settings-section-title">{section?.label}</div>
+            <div className="settings-eyebrow hud-label">ATLAS <span className="slash">/</span> SETTINGS</div>
+            <div className="settings-section-title hud-title">{section?.label}</div>
             <div className="settings-section-subtitle">{section?.subtitle}</div>
           </div>
         </div>

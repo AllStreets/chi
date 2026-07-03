@@ -1,7 +1,13 @@
 // frontend/src/hooks/__tests__/useCTA.test.js
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import useCTA from '../useCTA'
+
+// useCTA keeps a module-level train cache; re-import fresh per test so one
+// test's fetch results don't leak into the next test's initial state.
+async function freshUseCTA() {
+  vi.resetModules()
+  return (await import('../useCTA')).default
+}
 
 describe('useCTA', () => {
   beforeEach(() => vi.restoreAllMocks())
@@ -12,6 +18,7 @@ describe('useCTA', () => {
       json: async () => ({ trains: [{ rn: '101', lat: 41.87, lon: -87.63, line: 'Red' }] })
     }))
 
+    const useCTA = await freshUseCTA()
     const { result } = renderHook(() => useCTA())
     await act(async () => { await Promise.resolve() })
 
@@ -19,8 +26,9 @@ describe('useCTA', () => {
     expect(result.current.trains[0].rn).toBe('101')
   })
 
-  it('exposes loading state', () => {
+  it('exposes loading state', async () => {
     vi.stubGlobal('fetch', vi.fn().mockReturnValue(new Promise(() => {})))
+    const useCTA = await freshUseCTA()
     const { result } = renderHook(() => useCTA())
     expect(result.current.loading).toBe(true)
   })

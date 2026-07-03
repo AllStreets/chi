@@ -12,6 +12,11 @@ vi.mock('mapbox-gl', () => {
     this.getSource = vi.fn(() => ({ setData: vi.fn() }))
     this.isStyleLoaded = vi.fn(() => true)
     this.getCanvas = vi.fn(() => ({ style: {} }))
+    this.getLayer = vi.fn(() => undefined)
+    this.setLayoutProperty = vi.fn()
+    this.setPaintProperty = vi.fn()
+    this.flyTo = vi.fn()
+    this.resize = vi.fn()
   }
   return {
     default: {
@@ -40,7 +45,7 @@ import TransitPage from '../TransitPage'
 describe('TransitPage', () => {
   it('renders the CTA header', () => {
     render(<MemoryRouter><TransitPage /></MemoryRouter>)
-    expect(screen.getByText(/CTA/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/CTA/i).length).toBeGreaterThan(0)
   })
 
   it('renders line status cards', () => {

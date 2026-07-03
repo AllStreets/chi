@@ -106,29 +106,30 @@ export default function MyChicagoPage() {
 
   return (
     <div className="mychicago-page">
-      <div className="mychicago-header">
-        <span className="mychicago-title">My Chicago</span>
+      <div className="mychicago-header hud-rise">
+        <span className="hud-label mychicago-eyebrow">ATLAS <span className="slash">/</span> MY CHICAGO</span>
+        <span className="hud-title mychicago-title">My Chicago</span>
       </div>
 
-      <div className="mychicago-stats">
-        <div className="mc-stat">
+      <div className="mychicago-stats hud-rise">
+        <div className="mc-stat hud-panel">
           <span className="mc-stat-num">{me.favorites?.length ?? 0}</span>
-          <span className="mc-stat-label">Favorites</span>
+          <span className="mc-stat-label hud-label">Favorites</span>
         </div>
-        <div className="mc-stat">
+        <div className="mc-stat hud-panel">
           <span className="mc-stat-num">{me.visited?.length ?? 0}</span>
-          <span className="mc-stat-label">Been There</span>
+          <span className="mc-stat-label hud-label">Been There</span>
         </div>
       </div>
 
-      <div className="mychicago-tabs">
-        <button className={`mc-tab${tab === 'favorites' ? ' active' : ''}`} onClick={() => setTab('favorites')}>
+      <div className="mychicago-tabs hud-rise">
+        <button className={`mc-tab hud-pill${tab === 'favorites' ? ' active' : ''}`} onClick={() => setTab('favorites')}>
           <RiHeartFill /> Favorites
         </button>
-        <button className={`mc-tab${tab === 'visited' ? ' active' : ''}`} onClick={() => setTab('visited')}>
+        <button className={`mc-tab hud-pill${tab === 'visited' ? ' active' : ''}`} onClick={() => setTab('visited')}>
           <RiCheckboxCircleLine /> Been There
         </button>
-        <button className={`mc-tab${tab === 'plan' ? ' active' : ''}`} onClick={() => setTab('plan')}>
+        <button className={`mc-tab hud-pill${tab === 'plan' ? ' active' : ''}`} onClick={() => setTab('plan')}>
           <RiRouteLine /> Day Plan
         </button>
       </div>
@@ -232,7 +233,7 @@ export default function MyChicagoPage() {
       {/* Write note modal */}
       {noteModal && (
         <div className="mc-modal-overlay" onClick={() => setNoteModal(null)}>
-          <div className="mc-modal" onClick={e => e.stopPropagation()}>
+          <div className="mc-modal hud-panel hud-corners" onClick={e => e.stopPropagation()}>
             <div className="mc-modal-title">
               <RiPencilLine />
               {noteModal.placeName}
@@ -256,7 +257,7 @@ export default function MyChicagoPage() {
       {/* View note modal */}
       {viewModal && (
         <div className="mc-modal-overlay" onClick={() => setViewModal(null)}>
-          <div className="mc-modal" onClick={e => e.stopPropagation()}>
+          <div className="mc-modal hud-panel hud-corners" onClick={e => e.stopPropagation()}>
             <div className="mc-modal-title">
               <RiFileTextLine />
               {viewModal.placeName}

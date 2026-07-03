@@ -40,19 +40,28 @@ export default function ReportsPage() {
 
   return (
     <div className="reports-page">
-      <div className="reports-header">
-        <div>
-          <h1 className="reports-title">Chicago 311</h1>
+      <div className="reports-header hud-rise">
+        <div className="reports-header-text">
+          <span className="hud-label">ATLAS <span className="slash">/</span> 311</span>
+          <h1 className="hud-title reports-page-title">Chicago 311</h1>
           <p className="reports-sub">Recent service requests near downtown — public data, no account needed</p>
         </div>
-        <button className="reports-refresh" onClick={refresh}><RiRefreshLine /></button>
+        <div className="reports-header-controls">
+          {!loading && (
+            <span className="hud-chip live">
+              <span className="dot" />
+              {filtered.length} reports
+            </span>
+          )}
+          <button className="reports-refresh" onClick={refresh} title="Refresh"><RiRefreshLine /></button>
+        </div>
       </div>
 
       <div className="reports-filters">
         {types.map(t => (
           <button
             key={t}
-            className={`reports-filter${filter === t ? ' active' : ''}`}
+            className={`hud-pill reports-filter${filter === t ? ' active' : ''}`}
             onClick={() => setFilter(t)}
           >{t}</button>
         ))}
@@ -71,7 +80,7 @@ export default function ReportsPage() {
                 <div className="report-addr">{r.address || 'Location unavailable'}</div>
               </div>
               <div className="report-meta">
-                <span className={`report-status report-status--${r.status.toLowerCase().replace(/\s/g, '-')}`}>
+                <span className={`hud-chip report-status report-status--${r.status.toLowerCase().replace(/\s/g, '-')}`}>
                   {r.status}
                 </span>
                 <span className="report-date">{formatDate(r.created)}</span>

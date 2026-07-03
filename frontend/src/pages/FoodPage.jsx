@@ -105,7 +105,7 @@ export default function FoodPage() {
           .setLngLat(e.features[0].geometry.coordinates)
           .setHTML(
             `<strong>${name}</strong>` +
-            (address ? `<div style="color:#94a3b8;font-size:11px;margin:3px 0 2px">${address}</div>` : '') +
+            (address ? `<div style="color:#7e8aa3;font-size:11px;margin:3px 0 2px">${address}</div>` : '') +
             `<small>${rating ? `${rating} ★  ` : ''}${price || ''}${category ? ` · ${category}` : ''}</small>`
           )
           .addTo(map)
@@ -134,24 +134,30 @@ export default function FoodPage() {
 
   return (
     <div className="food-page">
-      <div className="food-header">
-        <span className="food-title">Food & Drink</span>
-        <div className="food-filters">
-          <div className="food-filter-types">
-            {TYPES.map(t => (
-              <button
-                key={t}
-                onClick={() => setType(t)}
-                className={`food-filter-btn${type === t ? ' active' : ''}`}
-              >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      {MAPBOX_TOKEN ? <div ref={mapContainer} className="food-map" /> : <div className="food-map"><MapPlaceholder /></div>}
+      <div className="food-vignette" />
 
-      <div className="food-layout">
+      <aside className="food-panel hud-panel hud-rise">
+        <div className="food-panel-header">
+          <span className="hud-label"><span className="slash">▸</span> ATLAS / DINING</span>
+          <span className="food-title hud-title">Food & Drink</span>
+          <span className={`food-count${loading ? ' loading' : ''}`}>
+            {loading ? 'SYNCING…' : `${places.length} PLACES MAPPED`}
+          </span>
+        </div>
+
+        <div className="food-filters">
+          {TYPES.map(t => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className={`hud-pill food-filter-btn${type === t ? ' active' : ''}`}
+            >
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </button>
+          ))}
+        </div>
+
         <div className="food-list">
           {loading && <div className="food-loading">Loading places...</div>}
           {places.map(p => (
@@ -212,7 +218,16 @@ export default function FoodPage() {
             </div>
           ))}
         </div>
-        {MAPBOX_TOKEN ? <div ref={mapContainer} className="food-map" /> : <div className="food-map"><MapPlaceholder /></div>}
+
+        <div className="food-panel-footer">
+          Click a pin for details · Data © OSM / Yelp
+        </div>
+      </aside>
+
+      <div className="food-hints">
+        <span><span className="hud-kbd">Drag</span> pan</span>
+        <span><span className="hud-kbd">Scroll</span> zoom</span>
+        <span><span className="hud-kbd">⌘K</span> search</span>
       </div>
     </div>
   )

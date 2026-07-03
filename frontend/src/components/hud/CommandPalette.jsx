@@ -71,8 +71,6 @@ export default function CommandPalette() {
     if (open) inputRef.current?.focus()
   }, [open])
 
-  useEffect(() => { setCursor(0) }, [query])
-
   if (!open) return null
 
   const go = (to) => {
@@ -102,7 +100,7 @@ export default function CommandPalette() {
             className="cmdk-input"
             placeholder="Jump to a page…"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => { setQuery(e.target.value); setCursor(0) }}
             onKeyDown={onKeyDown}
             aria-label="Command palette search"
           />

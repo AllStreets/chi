@@ -236,30 +236,37 @@ export default function WeatherPage() {
 
   return (
     <div className="weather-page">
-      <div className="weather-header">
+      <div className="weather-header hud-rise">
         <div className="weather-header-left">
-          <span className="weather-title">Weather &amp; Lake</span>
-          <span className="weather-sub">Chicago-specific intelligence</span>
+          <span className="hud-label weather-eyebrow">ATLAS <span className="slash">/</span> WEATHER</span>
+          <h1 className="hud-title weather-title">Weather &amp; Lake</h1>
+          <div className="weather-chip-row">
+            <span className="hud-chip">Chicago-specific intelligence</span>
+            {!loading && weather?.description && (
+              <span className="hud-chip weather-condition-chip">{weather.description}</span>
+            )}
+          </div>
         </div>
         {!loading && weather && (
-          <span className="weather-api-badge">
+          <span className="hud-chip live weather-api-badge">
+            <span className="dot" />
             <RiWifiLine size={9} />
             LIVE WEATHER DATA
           </span>
         )}
         {!loading && !weather && (
-          <span className="weather-api-badge weather-api-badge--offline">
+          <span className="hud-chip weather-api-badge weather-api-badge--offline">
             <RiWifiLine size={9} />
             NO API KEY
           </span>
         )}
       </div>
 
-      <div className="weather-grid">
+      <div className="weather-grid hud-rise">
 
         {/* Temperature row */}
-        <div className="weather-card weather-card--temps">
-          <div className="weather-card-label">CURRENT CONDITIONS</div>
+        <div className="weather-card hud-panel weather-card--temps">
+          <div className="weather-card-label hud-label">CURRENT CONDITIONS</div>
           {loading && <div className="weather-loading">Loading...</div>}
           {!loading && !weather && (
             <div className="weather-no-key">Add OPENWEATHER_KEY to see live data</div>
@@ -309,8 +316,11 @@ export default function WeatherPage() {
         </div>
 
         {/* Lake visual tile */}
-        <div className="weather-card weather-card--lake-scene">
-          <div className="weather-card-label">LAKE MICHIGAN</div>
+        <div className="weather-card hud-panel hud-corners weather-card--lake-scene">
+          <div className="weather-card-head">
+            <div className="weather-card-label hud-label">LAKE MICHIGAN</div>
+            <span className="weather-feed-tag">FEED 01 · LAKEFRONT</span>
+          </div>
           {loading && <div className="weather-loading">Loading...</div>}
           {!loading && !lake && (
             <div className="weather-no-key">Add OPENWEATHER_KEY to see lake data</div>
@@ -319,8 +329,8 @@ export default function WeatherPage() {
         </div>
 
         {/* Beach tiles */}
-        <div className="weather-card weather-card--beaches">
-          <div className="weather-card-label">LAKE MICHIGAN BEACHES</div>
+        <div className="weather-card hud-panel weather-card--beaches">
+          <div className="weather-card-label hud-label">LAKE MICHIGAN BEACHES</div>
           {!beachData && <div className="weather-loading">Loading beach conditions...</div>}
           {beachData?.keyMissing && <div className="weather-no-key">Add OPENWEATHER_KEY to enable beach conditions</div>}
           {beachData?.beaches && (
@@ -348,8 +358,8 @@ export default function WeatherPage() {
         </div>
 
         {/* Seasonal guide */}
-        <div className="weather-card weather-card--seasons">
-          <div className="weather-card-label">SEASONAL GUIDE</div>
+        <div className="weather-card hud-panel weather-card--seasons">
+          <div className="weather-card-label hud-label">SEASONAL GUIDE</div>
           <div className="weather-seasons">
             {SEASONS.map(s => (
               <div key={s.name} className="weather-season">
@@ -363,8 +373,8 @@ export default function WeatherPage() {
         </div>
 
         {/* Survival tips */}
-        <div className="weather-card weather-card--tips">
-          <div className="weather-card-label">SURVIVAL TIPS FOR NEW RESIDENTS</div>
+        <div className="weather-card hud-panel weather-card--tips">
+          <div className="weather-card-label hud-label">SURVIVAL TIPS FOR NEW RESIDENTS</div>
           <ul className="weather-tips">
             {SURVIVAL_TIPS.map((tip, i) => (
               <li key={i} className="weather-tip">

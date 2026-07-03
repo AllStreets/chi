@@ -8,10 +8,10 @@ describe('Sidebar', () => {
   const renderSidebar = () =>
     render(<MemoryRouter><Sidebar /></MemoryRouter>)
 
-  it('renders all 10 nav items', () => {
+  it('renders all 16 nav items (15 pages + settings)', () => {
     renderSidebar()
     const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(10)
+    expect(links).toHaveLength(16)
   })
 
   it('links to the correct routes', () => {

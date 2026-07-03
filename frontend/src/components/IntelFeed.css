@@ -1,68 +1,116 @@
+/* IntelFeed — CHI ATLAS floating glass HUD panel (Home map) */
+
 .intel-feed {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 64px;
+  right: 16px;
   width: 272px;
-  height: 100%;
-  background: linear-gradient(90deg, transparent 0%, rgba(6,11,24,0.87) 20%, rgba(6,11,24,0.96) 100%);
-  border-left: 1px solid var(--border);
-  padding: 20px 14px 16px;
-  overflow-y: auto;
+  max-height: calc(100vh - 96px);
   z-index: 10;
+
+  /* .hud-panel glass recipe */
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-panel);
+
+  padding: 14px 12px 12px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .intel-feed-header {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
+  gap: 4px;
+  margin-bottom: 6px;
+  padding: 0 2px 10px;
   border-bottom: 1px solid var(--border);
 }
 
 .intel-feed-title {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
   color: var(--accent);
-  letter-spacing: 0.15em;
+  text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.45);
 }
 
 .intel-feed-sub {
-  font-size: 11px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text-muted);
   font-family: var(--font-mono);
 }
 
-.intel-card {
-  background: rgba(15,31,58,0.7);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 9px 11px;
+.intel-clock {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  letter-spacing: 0.05em;
 }
 
-.intel-card--train {
+.intel-train-badge {
+  margin-left: 8px;
+  color: var(--accent);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  background: rgba(var(--accent-rgb), 0.08);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────────── */
+.intel-card {
+  background: rgba(148, 187, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 9px 11px;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.intel-card[role='button'] { cursor: pointer; }
+
+.intel-card[role='button']:hover {
+  border-color: var(--border-strong);
+  background: rgba(148, 187, 255, 0.07);
+  transform: translateY(-1px);
+}
+
+/* Micro-label section headers */
+.intel-card-label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 4px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 11px;
 }
 
-.intel-card-label {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--text-muted);
-  letter-spacing: 0.12em;
-  margin-bottom: 4px;
-}
+.intel-card-label svg { color: var(--text-faint); }
+
+.intel-card[role='button']:hover .intel-card-label { color: var(--text-muted); }
 
 .intel-card-value {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 500;
   color: var(--text);
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .intel-card-sub {
@@ -73,80 +121,15 @@
 
 .intel-card-badge {
   display: inline-block;
-  margin-top: 5px;
-  padding: 2px 8px;
-  background: rgba(0,212,255,0.1);
-  border: 1px solid rgba(0,212,255,0.3);
-  border-radius: 10px;
-  font-size: 10px;
+  margin-top: 6px;
+  padding: 2px 9px;
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  border-radius: 999px;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
   color: var(--accent);
   font-family: var(--font-mono);
-}
-
-.intel-train-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.intel-train-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.intel-train-line    { font-size: 12px; font-weight: 600; color: var(--text); }
-.intel-train-station { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
-
-.intel-train-time {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--accent);
-  white-space: nowrap;
-}
-
-.intel-clock {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  opacity: 0.9;
-}
-
-.intel-train-badge {
-  margin-left: 8px;
-  background: rgba(0, 212, 255, 0.15);
-  color: #00d4ff;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-family: var(--font-mono);
-}
-
-.intel-card--event {
-  border-left: 2px solid #10b981;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.intel-card--event:hover { background: rgba(16, 185, 129, 0.08); }
-
-.intel-card--event .intel-card-label {
-  color: #10b981;
-}
-
-.intel-card--spots {
-  border-left: 2px solid #f97316;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.intel-card--spots:hover { background: rgba(249, 115, 22, 0.08); }
-
-.intel-card--spots .intel-card-label {
-  color: #f97316;
 }
 
 .intel-card-name {
@@ -157,12 +140,13 @@
   line-height: 1.3;
 }
 
+/* ── Buzzing Now rows ──────────────────────────────────────────────── */
 .intel-spot-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 3px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--border);
 }
 
 .intel-spot-row:last-child { border-bottom: none; }
@@ -178,30 +162,19 @@
 
 .intel-spot-rating {
   font-size: 10px;
-  color: #f97316;
+  color: var(--accent);
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   margin-left: 8px;
 }
 
-/* ── Sports tile ───────────────────────────────────────────────────────────── */
-.intel-card--sports {
-  border-left: 2px solid #ef4444;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.intel-card--sports:hover { background: rgba(239, 68, 68, 0.08); }
-
-.intel-card--sports .intel-card-label {
-  color: #ef4444;
-}
-
+/* ── Sports rows ───────────────────────────────────────────────────── */
 .intel-sport-row {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 4px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--border);
 }
 
 .intel-sport-row:last-child { border-bottom: none; }
@@ -233,13 +206,15 @@
 .intel-sport-meta {
   font-size: 9px;
   font-family: var(--font-mono);
-  color: var(--text-muted);
-  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .intel-sport-time {
   font-size: 10px;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--text-muted);
   white-space: nowrap;
   display: flex;
@@ -247,15 +222,14 @@
   gap: 4px;
 }
 
-.intel-sport-time.live {
-  color: #ef4444;
-}
+.intel-sport-time.live { color: var(--red); }
 
 .intel-sport-live-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #ef4444;
+  background: var(--red);
+  box-shadow: 0 0 8px rgba(var(--red-rgb), 0.8);
   flex-shrink: 0;
   animation: intel-blink 1.2s ease-in-out infinite;
 }
@@ -263,6 +237,11 @@
 @keyframes intel-blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intel-sport-live-dot { animation: none; }
+  .intel-card[role='button']:hover { transform: none; }
 }
 
 /* Live score display */
@@ -276,41 +255,18 @@
   font-size: 13px;
   font-weight: 700;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   min-width: 16px;
   text-align: center;
 }
 
 .intel-sport-score-dash {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
 }
 
-/* ── Weather tile ──────────────────────────────────────────────────────────── */
-.intel-card--weather {
-  border-left: 2px solid #7dd3fc;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.intel-card--weather:hover { background: rgba(125, 211, 252, 0.08); }
-
-.intel-card--weather .intel-card-label {
-  color: #7dd3fc;
-}
-
-/* ── CTA tile ──────────────────────────────────────────────────────────────── */
-.intel-card--cta {
-  border-left: 2px solid #818cf8;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.intel-card--cta:hover { background: rgba(129, 140, 248, 0.08); }
-
-.intel-card--cta .intel-card-label {
-  color: #818cf8;
-}
-
+/* ── CTA nearby ────────────────────────────────────────────────────── */
 .intel-cta-row {
   display: flex;
   align-items: center;
@@ -318,27 +274,44 @@
   margin-top: 6px;
 }
 
-/* ── Top Story tile ────────────────────────────────────────────────────────── */
-.intel-card--news {
-  border-left: 2px solid #f59e0b;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  margin-top: 2px;
+.intel-train-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.intel-card--news .intel-card-label {
-  color: #f59e0b;
+.intel-train-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
 }
 
-.intel-card--news:hover {
-  background: rgba(245, 158, 11, 0.08);
-  border-left-color: #fbbf24;
+.intel-train-line    { font-size: 12px; font-weight: 600; color: var(--text); }
+.intel-train-station {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+.intel-train-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* ── Top story ─────────────────────────────────────────────────────── */
 .intel-news-title {
   font-size: 12px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text);
   line-height: 1.35;
   margin-top: 4px;
   display: -webkit-box;
@@ -350,8 +323,8 @@
 .intel-news-source {
   font-family: var(--font-mono);
   font-size: 9px;
-  letter-spacing: 0.06em;
-  color: #f59e0b;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
   margin-top: 5px;
   text-transform: uppercase;
 }

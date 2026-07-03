@@ -177,10 +177,14 @@ export default function NeighborhoodsPage() {
 
   return (
     <div className="neighborhoods-page">
-      <div className="neighborhoods-header">
-        <span className="neighborhoods-title">Neighborhoods</span>
-        <span className="neighborhoods-sub">Chicago from Streeterville outward</span>
-      </div>
+      <header className="neighborhoods-header hud-rise">
+        <div className="hud-label">ATLAS <span className="slash">/</span> NEIGHBORHOODS</div>
+        <h1 className="hud-title neighborhoods-title">Neighborhoods</h1>
+        <div className="neighborhoods-header-chips">
+          {!loading && <span className="hud-chip live"><span className="dot" />{hoods.length} profiles</span>}
+          <span className="hud-chip">Chicago from Streeterville outward</span>
+        </div>
+      </header>
 
       {loading && <div className="neighborhoods-loading">Loading...</div>}
 
@@ -190,7 +194,7 @@ export default function NeighborhoodsPage() {
             <div
               key={h.id}
               id={h.id}
-              className={`neighborhood-card${selected?.id === h.id ? ' selected' : ''}`}
+              className={`neighborhood-card hud-panel${selected?.id === h.id ? ' selected' : ''}`}
               onClick={() => setSelected(h)}
             >
               <div className="neighborhood-card-name">{h.name}</div>
@@ -210,10 +214,13 @@ export default function NeighborhoodsPage() {
 
         <div className="neighborhoods-right">
           {/* AI ask box — always visible */}
-          <div className="nd-ask">
-            <div className="nd-ask-label">
-              <RiBrainLine />
-              ASK YOUR NEIGHBORHOOD GUIDE
+          <div className="nd-ask hud-panel hud-rise">
+            <div className="nd-ask-head">
+              <div className="hud-label nd-ask-label">
+                <RiBrainLine />
+                AI ADVISOR <span className="slash">/</span> ASK YOUR NEIGHBORHOOD GUIDE
+              </div>
+              <span className="hud-chip live"><span className="dot" />{askStreaming ? 'streaming' : 'online'}</span>
             </div>
             <div className="nd-ask-input-row">
               <input
@@ -232,13 +239,13 @@ export default function NeighborhoodsPage() {
             {(answer || askStreaming) && (
               <div className="nd-ask-answer">
                 {answer}
-                {askStreaming && <span className="nd-ask-cursor">|</span>}
+                {askStreaming && <span className="nd-ask-cursor">▊</span>}
               </div>
             )}
           </div>
 
           {/* Neighborhood detail */}
-          <div className="neighborhoods-detail">
+          <div className="neighborhoods-detail hud-panel hud-corners hud-rise">
             {!selected && (
               <div className="neighborhoods-placeholder">
                 Select a neighborhood to explore
@@ -271,7 +278,7 @@ export default function NeighborhoodsPage() {
 
                 {selected.topSpots?.length > 0 && (
                   <div className="nd-spots">
-                    <div className="nd-spots-label">TOP SPOTS</div>
+                    <div className="hud-label nd-spots-label">TOP SPOTS</div>
                     {selected.topSpots.map(s => (
                       <span key={s} className="nd-spot">{s}</span>
                     ))}
@@ -279,9 +286,12 @@ export default function NeighborhoodsPage() {
                 )}
 
                 <div className="nd-ai">
-                  <div className="nd-ai-label">
-                    <RiBrainLine />
-                    AI BRIEF
+                  <div className="nd-ai-head">
+                    <div className="hud-label nd-ai-label">
+                      <RiBrainLine />
+                      AI BRIEF
+                    </div>
+                    {aiStreaming && <span className="hud-chip live"><span className="dot" />streaming</span>}
                   </div>
                   {!aiText && !aiStreaming && (
                     <button className="nd-ai-btn" onClick={fetchBrief}>
@@ -291,7 +301,7 @@ export default function NeighborhoodsPage() {
                   {(aiText || aiStreaming) && (
                     <div className="nd-ai-text">
                       {aiText}
-                      {aiStreaming && <span className="nd-ai-cursor">|</span>}
+                      {aiStreaming && <span className="nd-ai-cursor">▊</span>}
                     </div>
                   )}
                 </div>

@@ -193,10 +193,23 @@ export default function HealthPage() {
 
   return (
     <div className="hl-page">
-      <div className="hl-header">
-        <div className="hl-title-row">
-          <span className="hl-title">Chicago Health</span>
-          {loading && <span className="hl-loading-badge">Loading...</span>}
+      <div className="hl-header hud-rise">
+        <div className="hl-header-top">
+          <div className="hl-header-text">
+            <span className="hud-label">ATLAS <span className="slash">/</span> HEALTH</span>
+            <h1 className="hud-title hl-page-title">Chicago Health</h1>
+          </div>
+          <div className="hl-header-chips">
+            {loading ? (
+              <span className="hud-chip">Syncing…</span>
+            ) : (
+              <span className="hud-chip live">
+                <span className="dot" />
+                {places.length} sites
+              </span>
+            )}
+            <span className="hud-chip">{activeCat?.label || ''}</span>
+          </div>
         </div>
         <div className="hl-cats">
           {CATEGORIES.map(c => {
@@ -204,12 +217,12 @@ export default function HealthPage() {
             return (
               <button
                 key={c.key}
-                className={`hl-cat-btn${active ? ' active' : ''}`}
+                className={`hud-pill hl-cat-btn${active ? ' active' : ''}`}
                 style={active ? {
                   color: c.color,
-                  borderColor: c.color,
+                  borderColor: `rgba(${hexToRgb(c.color)},0.7)`,
                   background: `rgba(${hexToRgb(c.color)},0.12)`,
-                  boxShadow: `0 0 8px rgba(${hexToRgb(c.color)},0.4)`,
+                  boxShadow: `0 0 14px rgba(${hexToRgb(c.color)},0.35)`,
                 } : {}}
                 onClick={() => setActiveCategory(c.key)}
               >
@@ -228,7 +241,7 @@ export default function HealthPage() {
         }
 
         <div className="hl-sidebar">
-          <div className="hl-results-count">
+          <div className="hl-results-count hud-label">
             {loading
               ? 'Fetching...'
               : `${places.length} result${places.length !== 1 ? 's' : ''} — ${activeCat?.label || ''}`

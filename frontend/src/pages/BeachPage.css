@@ -1,31 +1,185 @@
-/* frontend/src/pages/BeachPage.css */
-.beach-page { padding: 24px; min-height: 100vh; background: var(--bg); color: var(--text); }
-
-.beach-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-.beach-title  { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
-.beach-sub    { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); margin: 0; }
-.beach-refresh { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; transition: color 0.15s; padding: 6px; }
-.beach-refresh:hover { color: #00d4ff; }
-
-.beach-loading, .beach-missing { font-size: 13px; color: var(--text-muted); font-family: var(--font-mono); padding: 12px 0; }
-.beach-missing code { color: #00d4ff; }
-
-.beach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; max-width: 900px; }
-
-.beach-card {
-  background: #0a1628; border: 1px solid #1e3a5f; border-radius: 8px; padding: 16px;
+/* frontend/src/pages/BeachPage.css — CHI ATLAS beach conditions HUD */
+.beach-page {
+  padding: 24px 28px 32px;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
 }
 
-.beach-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-.beach-name   { font-size: 14px; font-weight: 600; color: #fff; }
-.beach-desc   { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; max-width: 180px; }
-.beach-advisory { font-size: 11px; font-weight: 700; font-family: var(--font-mono); text-align: right; }
+/* ─── Header (ATLAS / BEACHES) ────────────────────────────────────────────── */
+.beach-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
 
-.beach-stats { display: flex; gap: 16px; margin-bottom: 12px; }
-.beach-stat  { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 12px; }
-.beach-stat svg   { font-size: 14px; color: var(--text-muted); }
-.beach-stat span  { font-family: var(--font-mono); font-size: 13px; color: #00d4ff; }
-.beach-stat label { font-size: 9px; color: var(--text-muted); font-family: var(--font-mono); }
+.beach-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-.beach-score-bar  { height: 3px; background: #1e3a5f; border-radius: 2px; overflow: hidden; }
-.beach-score-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+.beach-eyebrow { display: block; }
+
+.beach-title {
+  margin: 0;
+  text-shadow: 0 0 26px rgba(var(--accent-rgb), 0.35);
+}
+
+.beach-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.beach-refresh {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 15px;
+  padding: 0;
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.beach-refresh:hover {
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.5);
+  box-shadow: var(--glow-accent);
+}
+
+/* ─── States ──────────────────────────────────────────────────────────────── */
+.beach-loading,
+.beach-missing {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  padding: 12px 0;
+}
+
+.beach-missing code { color: var(--accent); }
+
+/* ─── Grid ────────────────────────────────────────────────────────────────── */
+.beach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  max-width: 960px;
+}
+
+/* ─── Status cards (glass) ────────────────────────────────────────────────── */
+.beach-card {
+  padding: 16px 18px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.beach-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.beach-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.beach-name {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.beach-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+  max-width: 180px;
+}
+
+.beach-advisory {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ─── Readings (mono numerals) ────────────────────────────────────────────── */
+.beach-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.beach-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 6px 8px;
+  background: rgba(9, 14, 26, 0.55);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.beach-stat svg {
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.beach-stat span {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.beach-stat label {
+  font-family: var(--font-ui);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ─── Score bar ───────────────────────────────────────────────────────────── */
+.beach-score-bar {
+  height: 3px;
+  background: rgba(148, 187, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.beach-score-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s;
+}
+
+@media (max-width: 600px) {
+  .beach-page { padding: 16px; }
+  .beach-header { flex-direction: column-reverse; gap: 10px; }
+}

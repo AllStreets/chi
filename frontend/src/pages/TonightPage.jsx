@@ -95,7 +95,7 @@ function VibeRing({ score }) {
   return (
     <div className="tn-vibe-ring-wrap">
       <svg width="110" height="110" viewBox="0 0 110 110" className="tn-vibe-svg">
-        <circle cx="55" cy="55" r={r} fill="none" stroke="#1e3a5f" strokeWidth="7" />
+        <circle cx="55" cy="55" r={r} fill="none" stroke="rgba(148, 187, 255, 0.14)" strokeWidth="7" />
         <circle
           cx="55" cy="55" r={r} fill="none"
           stroke={color} strokeWidth="7"
@@ -332,7 +332,7 @@ function TransitCard({ trainCount }) {
 function LastUpdated({ time }) {
   if (!time) return null
   const t = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' })
-  return <span className="tn-updated">Updated {t}</span>
+  return <span className="tn-updated hud-chip">Updated {t}</span>
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
@@ -348,12 +348,16 @@ export default function TonightPage() {
   return (
     <div className="tonight-page">
       {/* Header */}
-      <div className="tonight-header">
+      <div className="tonight-header hud-rise">
         <div className="tonight-header-left">
-          <h1 className="tonight-title">Tonight in Chicago</h1>
+          <span className="hud-label">ATLAS <span className="slash">/</span> TONIGHT</span>
+          <h1 className="tonight-title hud-title">Tonight in Chicago</h1>
           <div className="tonight-header-meta">
-            <RiWifiLine className="tn-live-badge-icon" />
-            <span className="tn-live-badge">LIVE</span>
+            <span className="tn-live-badge hud-chip live">
+              <span className="dot" />
+              <RiWifiLine className="tn-live-badge-icon" />
+              LIVE
+            </span>
             <LastUpdated time={lastFetch} />
           </div>
         </div>
@@ -367,7 +371,7 @@ export default function TonightPage() {
 
       {/* Vibe score bar (shown once data loads) */}
       {score != null && (
-        <div className="tn-vibe-bar">
+        <div className="tn-vibe-bar hud-panel hud-rise">
           <VibeRing score={score} />
           <div className="tn-vibe-desc">
             <div className="tn-vibe-title">Tonight's Vibe Score</div>

@@ -61,7 +61,7 @@ function TopMovers({ stocks }) {
   const gainers = sorted.slice(0, 4)
   const losers  = sorted.slice(-4).reverse()
   return (
-    <div className="fin-panel fin-panel--movers">
+    <div className="fin-panel fin-panel--movers hud-panel">
       <div className="fin-panel-label"><RiExchangeLine size={11} /> TOP MOVERS — TODAY</div>
       <div className="fin-movers-body">
         <div className="fin-movers-col">
@@ -129,7 +129,7 @@ function ChicagoIndex({ stocks }) {
   const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'TODAY']
 
   return (
-    <div className="fin-panel fin-panel--index">
+    <div className="fin-panel fin-panel--index hud-panel">
       <div className="fin-panel-label"><RiLineChartLine size={11} /> CHICAGO COMPOSITE — 7-DAY</div>
       <div className="fin-index-stat">
         <span className="fin-index-base">BASE 100</span>
@@ -168,7 +168,7 @@ function RangePositions({ stocks }) {
   const valid = stocks.filter(s => s.week52Low && s.week52High && s.price)
   if (!valid.length) return null
   return (
-    <div className="fin-panel fin-panel--range">
+    <div className="fin-panel fin-panel--range hud-panel">
       <div className="fin-panel-label"><RiBarChart2Line size={11} /> 52-WEEK RANGE POSITION</div>
       <div className="fin-range-rows">
         {valid.slice(0, 10).map(s => {
@@ -206,7 +206,7 @@ function SectorHeatmap({ stocks }) {
   const maxAbs = Math.max(...sectors.map(s => Math.abs(s.avg)), 0.01)
 
   return (
-    <div className="fin-panel fin-panel--sectors">
+    <div className="fin-panel fin-panel--sectors hud-panel">
       <div className="fin-panel-label"><RiBarChart2Line size={11} /> SECTOR PERFORMANCE</div>
       <div className="fin-sector-rows">
         {sectors.map(s => {
@@ -264,21 +264,25 @@ export default function FinancePage() {
 
   return (
     <div className="fin-page">
-      <div className="fin-header">
+      <header className="fin-header hud-rise">
         <div className="fin-title-row">
-          <span className="fin-title">CHICAGO FINANCE</span>
+          <div className="fin-header-text">
+            <span className="hud-label">ATLAS <span className="slash">/</span> FINANCE</span>
+            <h1 className="hud-title fin-title">Chicago Finance</h1>
+          </div>
           <div className="fin-header-right">
-            {lastUpdated && <span className="fin-last-updated">UPDATED {fmtTime(lastUpdated)}</span>}
+            <span className="hud-chip live"><span className="dot" />{loading ? 'SYNCING' : 'MARKET DATA'}</span>
+            {lastUpdated && <span className="hud-chip fin-last-updated">UPDATED {fmtTime(lastUpdated)}</span>}
             <button className={`fin-refresh${loading ? ' spinning' : ''}`} onClick={refresh} title="Refresh">
               <RiRefreshLine size={13} />
             </button>
           </div>
         </div>
         <TickerStrip stocks={stocks} />
-      </div>
+      </header>
 
       <div className="fin-grid">
-        <div className="fin-panel fin-panel--stocks">
+        <div className="fin-panel fin-panel--stocks hud-panel hud-rise">
           <div className="fin-panel-label"><RiBarChartLine size={11} /> CHICAGO EQUITIES</div>
           <table className="fin-table">
             <thead>
@@ -315,7 +319,7 @@ export default function FinancePage() {
         </div>
 
         <div className="fin-right-col">
-          <div className="fin-panel fin-panel--rents">
+          <div className="fin-panel fin-panel--rents hud-panel hud-rise">
             <div className="fin-panel-label"><RiBuilding2Line size={11} /> CHICAGO RENT BAROMETER</div>
             <div className="fin-rent-grid">
               {rents.map(r => (
@@ -334,7 +338,7 @@ export default function FinancePage() {
             </div>
           </div>
 
-          <div className="fin-panel fin-panel--indicators">
+          <div className="fin-panel fin-panel--indicators hud-panel hud-rise">
             <div className="fin-panel-label"><RiLineChartLine size={11} /> ECONOMIC PULSE</div>
             <div className="fin-indicators">
               {indicators.map((ind, i) => (

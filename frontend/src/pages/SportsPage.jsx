@@ -126,8 +126,8 @@ function ScoreBadge({ game }) {
         </span>
         <span className="sports-score-team" style={isFinal ? (homeWon ? winnerTeam : loserTeam) : undefined}>{game.homeTeam}</span>
       </div>
-      <span className={`sports-game-status${isLive ? ' live' : ' final'}`}>
-        {isLive && <span className="sports-live-dot" />}
+      <span className={`sports-game-status hud-chip${isLive ? ' live' : ' final'}`}>
+        {isLive && <span className="dot" />}
         {game.status}
       </span>
     </div>
@@ -139,45 +139,57 @@ export default function SportsPage() {
   const [selected, setSelected] = useState(null)
 
   const active = selected ? teams.filter(t => t.name === selected) : teams
+  const liveCount = teams.reduce(
+    (n, t) => n + (t.today || []).filter(g => g.state === 'in').length, 0
+  )
 
   return (
     <div className="sports-page">
-      <div className="sports-header">
-        <div className="sports-title-row">
-          <span className="sports-title">Sports</span>
-          <button
-            className={`sports-refresh-btn${loading ? ' spinning' : ''}`}
-            onClick={refresh}
-            title="Refresh scores"
-          >
-            <RiRefreshLine size={14} />
-          </button>
+      <header className="sports-header hud-rise">
+        <div className="sports-header-top">
+          <div className="sports-header-text">
+            <span className="hud-label">ATLAS <span className="slash">/</span> SPORTS</span>
+            <h1 className="hud-title sports-title">Sports</h1>
+          </div>
+          <div className="sports-header-chips">
+            {liveCount > 0 && (
+              <span className="hud-chip live"><span className="dot" />{liveCount} LIVE</span>
+            )}
+            <span className="hud-chip">{loading ? 'SYNCING' : `${teams.length} TEAMS`}</span>
+            <button
+              className={`sports-refresh-btn${loading ? ' spinning' : ''}`}
+              onClick={refresh}
+              title="Refresh scores"
+            >
+              <RiRefreshLine size={14} />
+            </button>
+          </div>
         </div>
         <div className="sports-team-filters">
           <button
-            className={`sports-team-btn${!selected ? ' active' : ''}`}
+            className={`hud-pill sports-team-btn${!selected ? ' active' : ''}`}
             onClick={() => setSelected(null)}
           >All</button>
           {teams.map(t => (
             <button
               key={t.name}
-              className={`sports-team-btn${selected === t.name ? ' active' : ''}`}
-              style={{ '--team-color': TEAM_COLORS[t.name] || '#00d4ff' }}
+              className={`hud-pill sports-team-btn${selected === t.name ? ' active' : ''}`}
+              style={{ '--team-color': TEAM_COLORS[t.name] || 'var(--accent)' }}
               onClick={() => setSelected(t.name === selected ? null : t.name)}
             >{t.name}</button>
           ))}
         </div>
-      </div>
+      </header>
 
       {loading && <div className="sports-loading">Loading schedules...</div>}
 
       <div className="sports-grid">
         {active.map(team => {
-          const color = TEAM_COLORS[team.name] || '#00d4ff'
+          const color = TEAM_COLORS[team.name] || 'var(--accent)'
           const hasToday    = (team.today    || []).length > 0
           const hasUpcoming = (team.upcoming || []).length > 0
           return (
-            <div key={team.name} className="sports-team-card" style={{ '--team-color': color }}>
+            <div key={team.name} className="sports-team-card hud-panel hud-rise" style={{ '--team-color': color }}>
               <div className="sports-team-header">
                 <span className="sports-team-name">{team.name}</span>
                 <span className="sports-team-league">{LEAGUE_LABELS[team.league] || team.league?.toUpperCase()}</span>

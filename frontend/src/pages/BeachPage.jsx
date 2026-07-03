@@ -22,12 +22,21 @@ export default function BeachPage() {
 
   return (
     <div className="beach-page">
-      <div className="beach-header">
-        <div>
-          <h1 className="beach-title">Lake Michigan Beaches</h1>
-          <p className="beach-sub">Real-time conditions at Chicago's public beaches</p>
+      <div className="beach-header hud-rise">
+        <div className="beach-header-left">
+          <span className="hud-label beach-eyebrow">ATLAS <span className="slash">/</span> BEACHES</span>
+          <h1 className="beach-title hud-title">Lake Michigan Beaches</h1>
+          <div className="beach-chip-row">
+            <span className="hud-chip">Real-time conditions at Chicago's public beaches</span>
+            {!loading && data?.beaches && (
+              <span className="hud-chip live">
+                <span className="dot" />
+                {data.beaches.length} monitored
+              </span>
+            )}
+          </div>
         </div>
-        <button className="beach-refresh" onClick={refresh}><RiRefreshLine /></button>
+        <button className="beach-refresh" onClick={refresh} title="Refresh conditions"><RiRefreshLine /></button>
       </div>
 
       {data?.keyMissing && (
@@ -37,9 +46,9 @@ export default function BeachPage() {
       {loading && <div className="beach-loading">Loading beach conditions...</div>}
 
       {!loading && data?.beaches && (
-        <div className="beach-grid">
+        <div className="beach-grid hud-rise">
           {data.beaches.map(b => (
-            <div key={b.id} className="beach-card">
+            <div key={b.id} className="beach-card hud-panel">
               <div className="beach-card-header">
                 <div>
                   <div className="beach-name">{b.name}</div>

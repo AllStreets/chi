@@ -139,7 +139,7 @@ export default function NightlifePage() {
           .setLngLat(e.features[0].geometry.coordinates)
           .setHTML(
             `<strong>${name}</strong>` +
-            (address  ? `<div style="color:#94a3b8;font-size:11px;margin:3px 0 2px">${address}</div>` : '') +
+            (address  ? `<div style="color:#7e8aa3;font-size:11px;margin:3px 0 2px">${address}</div>` : '') +
             (category ? `<small>· ${category}</small>` : '')
           )
           .addTo(map)
@@ -175,8 +175,20 @@ export default function NightlifePage() {
 
   return (
     <div className="nightlife-page">
-      <div className="nightlife-header">
-        <span className="nightlife-title">Nightlife</span>
+      {MAPBOX_TOKEN
+        ? <div ref={mapContainer} className="nightlife-map" />
+        : <div className="nightlife-map"><MapPlaceholder /></div>}
+      <div className="nightlife-vignette" />
+
+      <aside className="nightlife-panel hud-panel hud-rise">
+        <div className="nightlife-panel-header">
+          <span className="hud-label"><span className="slash">▸</span> ATLAS / AFTER DARK</span>
+          <span className="nightlife-title hud-title">Nightlife</span>
+          <span className={`nightlife-count${loading ? ' loading' : ''}`}>
+            {loading ? 'SYNCING…' : `${places.length} VENUES MAPPED`}
+          </span>
+        </div>
+
         <div className="nightlife-filters">
           {CATEGORIES.map(c => {
             const active = cat === c.key
@@ -197,11 +209,9 @@ export default function NightlifePage() {
             )
           })}
         </div>
-      </div>
 
-      <div className="nightlife-layout">
         <div className="nightlife-sidebar">
-          <div className="nightlife-scenes-label">SCENE PROFILES</div>
+          <span className="hud-label nightlife-scenes-label">SCENE PROFILES</span>
           {SCENES.map(s => (
             <div key={s.key} className="nightlife-scene" style={{ borderLeftColor: s.color }}>
               <div className="nightlife-scene-name">{s.name}</div>
@@ -209,7 +219,7 @@ export default function NightlifePage() {
             </div>
           ))}
 
-          <div className="nightlife-list-label">PLACES</div>
+          <span className="hud-label nightlife-list-label">PLACES</span>
           {loading && <div className="nightlife-loading">Loading...</div>}
           {places.map(p => {
             const dotColor = cat === 'nightlife_all'
@@ -263,9 +273,15 @@ export default function NightlifePage() {
           })}
         </div>
 
-        {MAPBOX_TOKEN
-          ? <div ref={mapContainer} className="nightlife-map" />
-          : <div className="nightlife-map"><MapPlaceholder /></div>}
+        <div className="nightlife-panel-footer">
+          Click a pin for details · Data © OSM / Yelp
+        </div>
+      </aside>
+
+      <div className="nightlife-hints">
+        <span><span className="hud-kbd">Drag</span> pan</span>
+        <span><span className="hud-kbd">Scroll</span> zoom</span>
+        <span><span className="hud-kbd">⌘K</span> search</span>
       </div>
     </div>
   )

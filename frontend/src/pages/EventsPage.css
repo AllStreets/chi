@@ -1,44 +1,47 @@
+/* frontend/src/pages/EventsPage.css — CHI ATLAS events HUD */
+
 .events-page {
-  padding: 20px 24px;
+  padding: 24px 28px;
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
   overflow-y: auto;
 }
 
+/* ── Header ─────────────────────────────────────────────────────────────────── */
 .events-header {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
 }
 
 .events-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
   display: block;
-  margin-bottom: 14px;
+  text-shadow: 0 0 26px rgba(var(--accent-rgb), 0.35);
 }
 
-/* ── Filter buttons ─────────────────────────────────────────────────────────── */
+.events-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+/* ── Filter pills ───────────────────────────────────────────────────────────── */
 .events-filters {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .events-filter-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 11px;
-  font-family: var(--font-ui);
-  cursor: pointer;
-  transition: all 0.15s;
+  gap: 6px;
 }
 
 .events-filter-icon {
@@ -46,21 +49,25 @@
   flex-shrink: 0;
 }
 
-.events-filter-btn:hover {
+/* Category color-coding on top of .hud-pill */
+.events-filter-btn.hud-pill:hover {
+  border-color: color-mix(in srgb, var(--cat-color, var(--accent)) 55%, transparent);
   color: var(--text);
-  border-color: rgba(255,255,255,0.2);
 }
 
-.events-filter-btn.active {
-  border-color: var(--cat-color, #00d4ff);
-  color: var(--cat-color, #00d4ff);
-  background: color-mix(in srgb, var(--cat-color, #00d4ff) 12%, transparent);
+.events-filter-btn.hud-pill.active {
+  color: var(--cat-color, var(--accent));
+  background: color-mix(in srgb, var(--cat-color, var(--accent)) 14%, transparent);
+  border-color: var(--cat-color, var(--accent));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--cat-color, var(--accent)) 28%, transparent);
 }
 
 /* ── States ─────────────────────────────────────────────────────────────────── */
 .events-loading,
 .events-empty {
   font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text-muted);
   font-family: var(--font-mono);
   padding: 20px 0;
@@ -70,28 +77,43 @@
 .events-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
-/* ── Card ───────────────────────────────────────────────────────────────────── */
+/* ── Card — glass panel with category tick ──────────────────────────────────── */
 .event-card {
-  background: rgba(10, 22, 40, 0.8);
+  position: relative;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
   border: 1px solid var(--border);
   border-left: 3px solid var(--cat-color, #64748b);
-  border-radius: 8px;
-  padding: 14px 16px;
-  transition: border-color 0.15s;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-panel);
+  padding: 15px 17px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.event-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 12%; right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(148, 187, 255, 0.28), transparent);
+  pointer-events: none;
 }
 
 .event-card:hover {
-  background: rgba(15, 31, 58, 0.9);
+  border-color: var(--border-strong);
+  border-left-color: var(--cat-color, #64748b);
+  transform: translateY(-1px);
 }
 
 .event-cat-row {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .event-cat-icon {
@@ -102,10 +124,11 @@
 
 .event-type-tag {
   font-size: 9px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
+  font-weight: 600;
   color: var(--cat-color, #64748b);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.22em;
 }
 
 .event-name {
@@ -119,7 +142,7 @@
 .event-meta {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .event-date,
@@ -145,14 +168,20 @@
   display: inline-block;
   margin-top: 12px;
   font-size: 11px;
+  letter-spacing: 0.06em;
   color: var(--accent);
   font-family: var(--font-mono);
   text-decoration: none;
-  opacity: 0.8;
-  transition: opacity 0.15s;
+  opacity: 0.85;
+  transition: opacity 0.15s, text-shadow 0.15s;
 }
 
 .event-link:hover {
   opacity: 1;
   text-decoration: underline;
+  text-shadow: 0 0 12px rgba(var(--accent-rgb), 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-card:hover { transform: none; }
 }

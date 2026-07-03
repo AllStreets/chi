@@ -64,13 +64,23 @@ export default function EventsPage() {
 
   return (
     <div className="events-page">
-      <div className="events-header">
-        <span className="events-title">Events</span>
+      <div className="events-header hud-rise">
+        <span className="hud-label">ATLAS <span className="slash">/</span> EVENTS</span>
+        <span className="events-title hud-title">Events</span>
+        <div className="events-chips">
+          <span className={`hud-chip${!loading && events.length > 0 ? ' live' : ''}`}>
+            {!loading && events.length > 0 && <span className="dot" />}
+            {loading ? 'SYNCING' : `${events.length} LISTED`}
+          </span>
+          {!loading && active !== 'all' && (
+            <span className="hud-chip">{filtered.length} {active}</span>
+          )}
+        </div>
         <div className="events-filters">
           {visibleCats.map(c => (
             <button
               key={c.key}
-              className={`events-filter-btn${active === c.key ? ' active' : ''}`}
+              className={`events-filter-btn hud-pill${active === c.key ? ' active' : ''}`}
               style={{ '--cat-color': c.color }}
               onClick={() => setActive(c.key)}
             >
@@ -84,10 +94,14 @@ export default function EventsPage() {
       {loading && <div className="events-loading">Loading events...</div>}
 
       <div className="events-grid">
-        {filtered.map(event => {
+        {filtered.map((event, i) => {
           const cat = getCategory(event.type)
           return (
-            <div key={event.id} className="event-card" style={{ '--cat-color': cat.color }}>
+            <div
+              key={event.id}
+              className="event-card hud-rise"
+              style={{ '--cat-color': cat.color, animationDelay: `${Math.min(i, 11) * 45 + 80}ms` }}
+            >
               <div className="event-cat-row">
                 <cat.Icon className="event-cat-icon" />
                 <span className="event-type-tag">{cat.label}</span>

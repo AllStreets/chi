@@ -1,96 +1,80 @@
+/* PoliticsPage (News Wire) — CHI ATLAS HUD */
+
 .pol-page {
-  background: #060b18;
+  background: var(--bg);
   min-height: 100vh;
-  padding: 24px 28px;
-  font-family: 'Space Grotesk', sans-serif;
-  color: #e2e8f0;
+  padding: 28px 32px;
+  font-family: var(--font-ui);
+  color: var(--text);
 }
 
 /* ── Header ── */
 .pol-header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  padding-bottom: 16px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+  gap: 16px;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
 }
 
-.pol-title {
-  font-family: 'JetBrains Mono', monospace;
-  color: #00d4ff;
-  font-size: 13px;
-  letter-spacing: 0.15em;
-  font-weight: 600;
-  text-transform: uppercase;
+.pol-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pol-page-title {
+  text-shadow: 0 0 24px rgba(var(--accent-rgb), 0.35);
 }
 
 .pol-header-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .pol-refresh {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #00d4ff;
-  font-size: 16px;
-  display: flex;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  border-radius: 4px;
-  transition: transform 0.25s ease, opacity 0.2s;
-  opacity: 0.8;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 15px;
+  transition: transform 0.25s ease, color 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
 .pol-refresh:hover {
-  opacity: 1;
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.5);
+  box-shadow: var(--glow-accent);
   transform: rotate(180deg);
 }
 
-.pol-timestamp {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: #475569;
-}
+.pol-timestamp { white-space: nowrap; }
 
 /* ── Tabs ── */
 .pol-tabs {
   display: flex;
-  gap: 4px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid rgba(30, 58, 95, 0.4);
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 22px;
 }
 
 .pol-tab {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  padding: 8px 14px;
-  cursor: pointer;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #64748b;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.pol-tab:hover {
-  color: #94a3b8;
-}
-
-.pol-tab--active {
-  color: #00d4ff;
-  border-bottom-color: #00d4ff;
 }
 
 .pol-tab-icon {
@@ -107,16 +91,20 @@
 
 /* ── Card ── */
 .pol-card {
-  background: rgba(10, 22, 40, 0.6);
-  border: 1px solid rgba(30, 58, 95, 0.4);
-  border-radius: 6px;
-  padding: 16px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .pol-card:hover {
-  border-color: rgba(0, 212, 255, 0.25);
-  box-shadow: 0 2px 12px rgba(0, 212, 255, 0.06);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
 }
 
 .pol-card-meta {
@@ -126,35 +114,40 @@
 }
 
 .pol-source-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--badge-color, #64748b);
-  background: color-mix(in srgb, var(--badge-color, #64748b) 20%, transparent);
-  padding: 2px 7px;
-  border-radius: 3px;
+  letter-spacing: 0.1em;
+  color: var(--badge-color, var(--text-muted));
+  border: 1px solid color-mix(in srgb, var(--badge-color, #64748b) 40%, transparent);
+  background: color-mix(in srgb, var(--badge-color, #64748b) 12%, transparent);
+  padding: 2px 9px;
+  border-radius: 999px;
 }
 
 .pol-time {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: #475569;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
 }
 
 .pol-card-title {
-  color: #e2e8f0;
-  font-size: 15px;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 15.5px;
   font-weight: 600;
-  margin-top: 8px;
+  margin-top: 9px;
   line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 
 .pol-card-desc {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.55;
   margin-top: 6px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -166,24 +159,58 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: #00d4ff;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  color: var(--accent);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
   font-weight: 600;
   text-decoration: none;
-  margin-top: 10px;
-  letter-spacing: 0.05em;
-  transition: text-decoration 0.15s;
+  margin-top: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .pol-card-link:hover {
   text-decoration: underline;
 }
 
+/* ── Feature (top story) card ── */
+.pol-card--feature {
+  padding: 22px 24px;
+  border-color: rgba(var(--accent-rgb), 0.22);
+}
+
+.pol-card--feature::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.55), transparent);
+  pointer-events: none;
+}
+
+.pol-feature-tag {
+  display: block;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.pol-card--feature .pol-card-title {
+  font-size: 21px;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+
+.pol-card--feature .pol-card-desc {
+  font-size: 13.5px;
+  -webkit-line-clamp: 3;
+}
+
 /* ── Skeleton ── */
 @keyframes pol-shimmer {
   0% { opacity: 0.4; }
-  50% { opacity: 0.7; }
+  50% { opacity: 0.75; }
   100% { opacity: 0.4; }
 }
 
@@ -199,7 +226,7 @@
 }
 
 .pol-skel-line {
-  background: rgba(30, 58, 95, 0.5);
+  background: rgba(148, 187, 255, 0.09);
   border-radius: 4px;
   animation: pol-shimmer 1.5s infinite;
   height: 12px;
@@ -233,12 +260,26 @@
   justify-content: center;
   gap: 12px;
   padding: 64px 24px;
-  color: #334155;
-  font-size: 14px;
-  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-faint);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
 }
 
 .pol-empty-icon {
   font-size: 36px;
   opacity: 0.5;
+}
+
+@media (max-width: 720px) {
+  .pol-page { padding: 20px 16px; }
+
+  .pol-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pol-header-controls { justify-content: flex-start; }
 }

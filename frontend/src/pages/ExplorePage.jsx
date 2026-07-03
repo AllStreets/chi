@@ -103,10 +103,13 @@ function AIChatBox() {
   }
 
   return (
-    <div className="explore-ai">
-      <div className="explore-ai-label">
-        <RiBrainLine />
-        ASK YOUR CHICAGO GUIDE
+    <div className="explore-ai hud-panel hud-rise">
+      <div className="explore-ai-head">
+        <div className="hud-label explore-ai-label">
+          <RiBrainLine />
+          AI GUIDE <span className="slash">/</span> ASK YOUR CHICAGO GUIDE
+        </div>
+        <span className="hud-chip live"><span className="dot" />{streaming ? 'streaming' : 'online'}</span>
       </div>
       <div className="explore-ai-input-row">
         <input
@@ -123,7 +126,7 @@ function AIChatBox() {
       {(answer || streaming) && (
         <div className="explore-ai-answer">
           {answer}
-          {streaming && <span className="explore-ai-cursor">|</span>}
+          {streaming && <span className="explore-ai-cursor">▊</span>}
         </div>
       )}
     </div>
@@ -138,24 +141,28 @@ export default function ExplorePage() {
 
   return (
     <div className="explore-page">
-      <div className="explore-header">
-        <span className="explore-title">Explore Chicago</span>
-        <span className="explore-sub">New to the city — start here</span>
-      </div>
+      <header className="explore-header hud-rise">
+        <div className="hud-label">ATLAS <span className="slash">/</span> EXPLORE</div>
+        <h1 className="hud-title explore-title">Explore Chicago</h1>
+        <div className="explore-header-chips">
+          <span className="hud-chip live"><span className="dot" />{LANDMARKS.length} landmarks curated</span>
+          <span className="hud-chip">New to the city — start here</span>
+        </div>
+      </header>
 
       <AIChatBox />
 
-      <div className="explore-filters">
+      <div className="explore-filters hud-rise">
         {CATEGORIES.map(c => (
           <button
             key={c}
-            className={`explore-filter-btn${category === c ? ' active' : ''}`}
+            className={`hud-pill explore-filter-btn${category === c ? ' active' : ''}`}
             style={{ '--cat-color': CAT_COLORS[c] }}
             onClick={() => setCategory(c)}
           >{c}</button>
         ))}
         <button
-          className={`explore-tour-btn${tourMode ? ' active' : ''}`}
+          className={`hud-pill explore-tour-btn${tourMode ? ' active' : ''}`}
           onClick={() => setTourMode(t => !t)}
         >
           <RiMapPinLine /> {tourMode ? 'Exit Tour' : 'Walking Tour'}
@@ -163,8 +170,8 @@ export default function ExplorePage() {
       </div>
 
       {tourMode && (
-        <div className="explore-tour-panel">
-          <div className="explore-tour-header">Walking Tour — {filtered.length} stops</div>
+        <div className="explore-tour-panel hud-panel hud-corners hud-rise">
+          <div className="explore-tour-header hud-label">Walking Tour <span className="slash">/</span> {filtered.length} stops</div>
           {filtered.map((lm, i) => (
             <div key={lm.name} className="explore-tour-stop">
               <span className="tour-stop-num">{i + 1}</span>
@@ -184,7 +191,7 @@ export default function ExplorePage() {
 
       <div className="explore-grid">
         {filtered.map(l => (
-          <div key={l.name} className="explore-card" style={{ '--cat-color': CAT_COLORS[l.category] }}>
+          <div key={l.name} className="explore-card hud-panel" style={{ '--cat-color': CAT_COLORS[l.category] }}>
             <div className="explore-card-cat">{l.category}</div>
             <div className="explore-card-name">{l.name}</div>
             <div className="explore-card-desc">{l.desc}</div>

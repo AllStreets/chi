@@ -59,12 +59,13 @@ function useNews() {
   return { data, loading, lastUpdated, refresh: fetchNews }
 }
 
-function NewsCard({ article }) {
+function NewsCard({ article, feature = false }) {
   const color = SOURCE_COLORS[article.source] || '#64748b'
   const time = relativeTime(article.pubDate)
 
   return (
-    <div className="pol-card">
+    <div className={`pol-card${feature ? ' pol-card--feature' : ''}`}>
+      {feature && <span className="pol-feature-tag hud-label">TOP STORY</span>}
       <div className="pol-card-meta">
         <span
           className="pol-source-badge"
@@ -121,17 +122,26 @@ export default function PoliticsPage() {
 
   return (
     <div className="pol-page">
-      <div className="pol-header">
-        <span className="pol-title">CHICAGO NEWS WIRE</span>
+      <div className="pol-header hud-rise">
+        <div className="pol-header-text">
+          <span className="hud-label">ATLAS <span className="slash">/</span> NEWS</span>
+          <h1 className="hud-title pol-page-title">News Wire</h1>
+        </div>
         <div className="pol-header-controls">
+          {!loading && (
+            <span className="hud-chip live">
+              <span className="dot" />
+              {articles.length} stories
+            </span>
+          )}
+          {lastUpdated && (
+            <span className="hud-chip pol-timestamp">
+              UPD {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
           <button className="pol-refresh" onClick={refresh} title="Refresh">
             <RiRefreshLine />
           </button>
-          {lastUpdated && (
-            <span className="pol-timestamp">
-              {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          )}
         </div>
       </div>
 
@@ -139,7 +149,7 @@ export default function PoliticsPage() {
         {TABS.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
-            className={`pol-tab${activeTab === key ? ' pol-tab--active' : ''}`}
+            className={`hud-pill pol-tab${activeTab === key ? ' active' : ''}`}
             onClick={() => setActiveTab(key)}
           >
             <Icon className="pol-tab-icon" />
@@ -158,7 +168,7 @@ export default function PoliticsPage() {
           </div>
         ) : (
           articles.map((article, i) => (
-            <NewsCard key={`${article.link || article.title}-${i}`} article={article} />
+            <NewsCard key={`${article.link || article.title}-${i}`} article={article} feature={i === 0} />
           ))
         )}
       </div>
