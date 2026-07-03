@@ -105,21 +105,46 @@ router.get('/routes', async (_req, res) => {
 })
 
 // GET /api/cta/trains — all active train positions
+async function fetchLiveTrains() {
+  const r = await fetch(`${BASE}/ttpositions.aspx?rt=Red,Blue,Brn,G,Org,P,Pink,Y&key=${key()}&outputType=JSON`)
+  const data = await r.json()
+  const routes = data?.ctatt?.route || []
+  const allTrains = (Array.isArray(routes) ? routes : [routes]).flatMap(r => {
+    const routeName = r['@name']
+    const t = r.train
+    const list = t ? (Array.isArray(t) ? t : [t]) : []
+    return list.map(train => ({ ...train, rt: routeName }))
+  })
+  return allTrains.map(normalizeTrain)
+}
+
 router.get('/trains', async (_req, res) => {
   try {
-    const r = await fetch(`${BASE}/ttpositions.aspx?rt=Red,Blue,Brn,G,Org,P,Pink,Y&key=${key()}&outputType=JSON`)
-    const data = await r.json()
-    const routes = data?.ctatt?.route || []
-    const allTrains = (Array.isArray(routes) ? routes : [routes]).flatMap(r => {
-      const routeName = r['@name']
-      const t = r.train
-      const list = t ? (Array.isArray(t) ? t : [t]) : []
-      return list.map(train => ({ ...train, rt: routeName }))
-    })
-    const trains = allTrains.map(normalizeTrain)
+    const trains = await fetchLiveTrains()
     res.json({ trains })
   } catch (e) {
     res.status(502).json({ error: 'CTA trains unavailable', detail: e.message })
+  }
+})
+
+// ── Time machine: snapshot history recorded by lib/ctaRecorder ─────────────
+db.exec(`CREATE TABLE IF NOT EXISTS cta_snapshots (
+  ts INTEGER PRIMARY KEY,
+  data TEXT NOT NULL
+)`)
+
+// GET /api/cta/history?from=<ms>&to=<ms> — recorded train snapshots
+router.get('/history', (req, res) => {
+  const now = Date.now()
+  const from = Number(req.query.from) || now - 24 * 60 * 60 * 1000
+  const to = Number(req.query.to) || now
+  try {
+    const rows = db.prepare(
+      'SELECT ts, data FROM cta_snapshots WHERE ts >= ? AND ts <= ? ORDER BY ts ASC LIMIT 2000'
+    ).all(from, to)
+    res.json({ snapshots: rows.map(r => ({ ts: r.ts, trains: JSON.parse(r.data) })) })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
   }
 })
 
@@ -209,3 +234,4 @@ router.get('/bus-routes', async (_req, res) => {
 })
 
 module.exports = router
+module.exports.fetchLiveTrains = fetchLiveTrains

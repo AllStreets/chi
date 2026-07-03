@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { RiWifiLine, RiRefreshLine, RiBusLine, RiBikeLine } from 'react-icons/ri'
+import {
+  RiWifiLine, RiRefreshLine, RiBusLine, RiBikeLine,
+  RiHistoryLine, RiPlayFill, RiPauseFill,
+} from 'react-icons/ri'
 import HudClock from '../components/hud/HudClock'
 import useCTA from '../hooks/useCTA'
 import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
@@ -33,6 +36,15 @@ const LINES = [
 
 let _routesCache = null
 
+function fmtReplayClock(ts) {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Chicago',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).format(new Date(ts))
+}
+
+const REPLAY_SPEEDS = [1, 30, 60, 240]
+
 export default function TransitPage() {
   const trainDataRef  = useRef([])
   const trainStateRef = useRef(sharedTrainState)   // shared with HomePage — no position reset on navigate
@@ -42,6 +54,75 @@ export default function TransitPage() {
   const [showBuses, setShowBuses]   = useState(false)
   const [buses, setBuses]           = useState([])
   const [showDivvy, setShowDivvy]   = useState(false)
+
+  // ── Time machine ──────────────────────────────────────────────────
+  // Mutable replay engine consumed by the map's rAF loop; React state
+  // below mirrors it for the scrubber UI at a slower cadence.
+  const replayRef = useRef({
+    active: false, playing: true, speed: 60,
+    ts: 0, snaps: [], idx: -1, lastFrame: 0,
+  })
+  const [replayActive, setReplayActive] = useState(false)
+  const [replayClock, setReplayClock] = useState('')
+  const [replayPos, setReplayPos] = useState(0)       // 0..1000 slider position
+  const [replayPlaying, setReplayPlaying] = useState(true)
+  const [replaySpeed, setReplaySpeed] = useState(60)
+  const [replayStatus, setReplayStatus] = useState('') // '', 'loading', 'empty'
+
+  const enterReplay = async () => {
+    setReplayStatus('loading')
+    try {
+      const r = await fetch(`${API}/api/cta/history`)
+      const d = await r.json()
+      const snaps = d.snapshots || []
+      if (snaps.length < 2) { setReplayStatus('empty'); return }
+      const rp = replayRef.current
+      rp.snaps = snaps
+      rp.ts = snaps[0].ts
+      rp.idx = -1
+      rp.playing = true
+      rp.lastFrame = 0
+      rp.active = true
+      setReplaySpeed(rp.speed)
+      setReplayPlaying(true)
+      setReplayActive(true)
+      setReplayStatus('')
+    } catch {
+      setReplayStatus('empty')
+    }
+  }
+
+  const exitReplay = () => {
+    replayRef.current.active = false
+    replayRef.current.idx = -1
+    setReplayActive(false)
+  }
+
+  // Mirror the replay engine into UI state while active
+  useEffect(() => {
+    if (!replayActive) return
+    const id = setInterval(() => {
+      const rp = replayRef.current
+      if (!rp.snaps.length) return
+      const from = rp.snaps[0].ts
+      const to = rp.snaps[rp.snaps.length - 1].ts
+      setReplayClock(fmtReplayClock(rp.ts))
+      setReplayPos(to > from ? Math.round(((rp.ts - from) / (to - from)) * 1000) : 0)
+      setReplayPlaying(rp.playing)
+    }, 250)
+    return () => clearInterval(id)
+  }, [replayActive])
+
+  const scrubTo = (pos) => {
+    const rp = replayRef.current
+    if (!rp.snaps.length) return
+    const from = rp.snaps[0].ts
+    const to = rp.snaps[rp.snaps.length - 1].ts
+    rp.ts = from + (pos / 1000) * (to - from)
+    rp.idx = -1
+    setReplayPos(pos)
+    setReplayClock(fmtReplayClock(rp.ts))
+  }
 
   useEffect(() => {
     trainDataRef.current = trains
@@ -194,6 +275,38 @@ export default function TransitPage() {
         map.setPaintProperty('train-ring', 'circle-stroke-opacity', Math.max(0, 0.08 + Math.sin(phase.ring) * 0.25))
       }
 
+      // ── Replay mode: positions come from recorded snapshots ─────────
+      const rp = replayRef.current
+      if (rp.active && rp.snaps.length) {
+        const frameNow = performance.now()
+        if (rp.playing) {
+          const dt = rp.lastFrame ? frameNow - rp.lastFrame : 0
+          rp.ts += dt * rp.speed
+          const end = rp.snaps[rp.snaps.length - 1].ts
+          if (rp.ts >= end) { rp.ts = end; rp.playing = false }
+        }
+        rp.lastFrame = frameNow
+        // nearest snapshot at or before ts
+        let lo = 0, hi = rp.snaps.length - 1
+        while (lo < hi) {
+          const mid = (lo + hi + 1) >> 1
+          if (rp.snaps[mid].ts <= rp.ts) lo = mid; else hi = mid - 1
+        }
+        if (lo !== rp.idx && map.getSource('trains') && map.isStyleLoaded()) {
+          rp.idx = lo
+          map.getSource('trains').setData({
+            type: 'FeatureCollection',
+            features: rp.snaps[lo].trains.map(t => ({
+              type: 'Feature',
+              geometry: { type: 'Point', coordinates: [t.lon, t.lat] },
+              properties: { rn: t.rn, line: t.line, color: LINE_COLOR_MAP[t.line] || '#00d4ff' }
+            }))
+          })
+        }
+        return
+      }
+      rp.lastFrame = 0
+
       const now = Date.now()
       const states = trainStateRef.current
       const trainList = trainDataRef.current
@@ -301,11 +414,25 @@ export default function TransitPage() {
       </aside>
 
       <div className="transit-controls">
-        <span className="hud-chip live">
-          <span className="dot" />
-          <RiWifiLine size={10} />
-          LIVE CTA DATA
-        </span>
+        {replayActive ? (
+          <span className="hud-chip replay-chip">
+            <RiHistoryLine size={10} />
+            REPLAY
+          </span>
+        ) : (
+          <span className="hud-chip live">
+            <span className="dot" />
+            <RiWifiLine size={10} />
+            LIVE CTA DATA
+          </span>
+        )}
+        <button
+          className={`transit-ctl-btn${replayActive ? ' active' : ''}`}
+          onClick={() => (replayActive ? exitReplay() : enterReplay())}
+          title={replayActive ? 'Back to live' : 'Replay the last 24 hours'}
+        >
+          <RiHistoryLine size={13} />
+        </button>
         <button
           className={`transit-ctl-btn${showDivvy ? ' active' : ''}`}
           onClick={() => setShowDivvy(s => !s)}
@@ -329,11 +456,56 @@ export default function TransitPage() {
         </button>
       </div>
 
-      <div className="transit-hints">
-        <span><span className="hud-kbd">Drag</span> rotate</span>
-        <span><span className="hud-kbd">Scroll</span> zoom</span>
-        <span><span className="hud-kbd">⌘K</span> search</span>
-      </div>
+      {replayActive ? (
+        <div className="transit-scrubber hud-panel">
+          <button
+            className="scrub-play"
+            onClick={() => {
+              const rp = replayRef.current
+              rp.playing = !rp.playing
+              rp.lastFrame = 0
+              setReplayPlaying(rp.playing)
+            }}
+            aria-label={replayPlaying ? 'Pause replay' : 'Play replay'}
+          >
+            {replayPlaying ? <RiPauseFill size={16} /> : <RiPlayFill size={16} />}
+          </button>
+          <span className="scrub-clock">{replayClock}<small>CT</small></span>
+          <input
+            className="scrub-slider"
+            type="range"
+            min={0}
+            max={1000}
+            value={replayPos}
+            onChange={e => scrubTo(Number(e.target.value))}
+            aria-label="Replay position"
+          />
+          <div className="scrub-speeds">
+            {REPLAY_SPEEDS.map(s => (
+              <button
+                key={s}
+                className={`hud-pill${replaySpeed === s ? ' active' : ''}`}
+                onClick={() => {
+                  replayRef.current.speed = s
+                  setReplaySpeed(s)
+                }}
+              >
+                {s}×
+              </button>
+            ))}
+          </div>
+          <button className="scrub-live" onClick={exitReplay}>LIVE</button>
+        </div>
+      ) : (
+        <div className="transit-hints">
+          {replayStatus === 'empty' && (
+            <span className="scrub-empty">RECORDING — replay opens after a few minutes of data</span>
+          )}
+          <span><span className="hud-kbd">Drag</span> rotate</span>
+          <span><span className="hud-kbd">Scroll</span> zoom</span>
+          <span><span className="hud-kbd">⌘K</span> search</span>
+        </div>
+      )}
     </div>
   )
 }

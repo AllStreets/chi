@@ -65,6 +65,8 @@ app.use('/api/health-places', require('./routes/health'))
 if (require.main === module) {
   const port = process.env.PORT || 3001
   app.listen(port, () => console.log(`Backend on :${port}`))
+  // Record train positions for the Transit time-machine (not during tests)
+  require('./lib/ctaRecorder').start()
 }
 
 module.exports = app
