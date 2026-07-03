@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { RiWifiLine, RiRefreshLine, RiBusLine, RiBikeLine } from 'react-icons/ri'
+import HudClock from '../components/hud/HudClock'
 import useCTA from '../hooks/useCTA'
 import { sharedTrainState } from '../hooks/trainAnimState'
 import MapPlaceholder from '../components/MapPlaceholder'
@@ -70,7 +71,8 @@ export default function TransitPage() {
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
       center: [-87.6298, 41.8781],
-      zoom: 11, pitch: 0,
+      zoom: 11, pitch: 42, bearing: -12,
+      antialias: true,
     })
 
     map.on('load', () => {
@@ -280,54 +282,77 @@ export default function TransitPage() {
 
   return (
     <div className="transit-page">
-      <div className="transit-header">
-        <span className="transit-title">CTA Live Transit</span>
-        <span className="transit-sub">{loading ? 'Loading...' : `${trains.length} active trains`}</span>
-        <div className="transit-live-controls">
-          <span className="transit-live-badge">
-            <RiWifiLine size={9} />
-            LIVE CTA DATA
-          </span>
-          <button
-            className={`transit-bike-btn${showDivvy ? ' active' : ''}`}
-            onClick={() => setShowDivvy(s => !s)}
-            title={showDivvy ? 'Hide Divvy stations' : 'Show Divvy stations'}
-          >
-            <RiBikeLine size={13} />
-          </button>
-          <button
-            className={`transit-bus-btn${showBuses ? ' active' : ''}`}
-            onClick={() => setShowBuses(s => !s)}
-            title={showBuses ? 'Hide buses' : 'Show buses'}
-          >
-            <RiBusLine size={13} />
-          </button>
-          <button
-            className={`transit-refresh-btn${loading ? ' spinning' : ''}`}
-            onClick={refresh}
-            title="Refresh train data"
-          >
-            <RiRefreshLine size={13} />
-          </button>
+      {MAPBOX_TOKEN
+        ? <div ref={mapContainer} className="transit-map" />
+        : <div className="transit-map"><MapPlaceholder /></div>}
+      <div className="transit-vignette" />
+
+      <aside className="transit-panel hud-panel hud-rise">
+        <div className="transit-panel-header">
+          <span className="hud-label"><span className="slash">▸</span> CTA NETWORK</span>
+          <span className="transit-panel-title">CHICAGO&nbsp;“L”</span>
+          <div className="transit-clock-row">
+            <HudClock />
+            <span className={`transit-count${loading ? ' loading' : ''}`}>
+              {loading ? 'SYNCING…' : `${trains.length} TRAINS RUNNING`}
+            </span>
+          </div>
         </div>
-      </div>
-      <div className="transit-layout">
-        <div className="transit-sidebar">
+        <div className="transit-lines">
+          <span className="hud-label transit-lines-label">Lines</span>
           {LINES.map(line => (
             <div key={line.id} className="line-card">
-              <div className="line-card-swatch" style={{ background: line.color }} />
-              <div className="line-card-info">
-                <span className="line-card-name">{line.label}</span>
-                <span className="line-card-count" style={{ color: line.color }}>
-                  {trainsByLine[line.id]?.length || 0} trains
-                </span>
-              </div>
+              <span
+                className="line-card-badge"
+                style={{ background: line.color, boxShadow: `0 0 12px ${line.color}66` }}
+              >
+                {line.id.slice(0, 1)}
+              </span>
+              <span className="line-card-name">{line.label}</span>
+              <span className="line-card-count" style={{ color: line.color }}>
+                {trainsByLine[line.id]?.length || 0}
+              </span>
             </div>
           ))}
         </div>
-        {MAPBOX_TOKEN
-          ? <div ref={mapContainer} className="transit-map" />
-          : <div className="transit-map"><MapPlaceholder /></div>}
+        <div className="transit-panel-footer">
+          Click a train dot for details · Data © CTA
+        </div>
+      </aside>
+
+      <div className="transit-controls">
+        <span className="hud-chip live">
+          <span className="dot" />
+          <RiWifiLine size={10} />
+          LIVE CTA DATA
+        </span>
+        <button
+          className={`transit-ctl-btn${showDivvy ? ' active' : ''}`}
+          onClick={() => setShowDivvy(s => !s)}
+          title={showDivvy ? 'Hide Divvy stations' : 'Show Divvy stations'}
+        >
+          <RiBikeLine size={13} />
+        </button>
+        <button
+          className={`transit-ctl-btn${showBuses ? ' active' : ''}`}
+          onClick={() => setShowBuses(s => !s)}
+          title={showBuses ? 'Hide buses' : 'Show buses'}
+        >
+          <RiBusLine size={13} />
+        </button>
+        <button
+          className={`transit-ctl-btn refresh${loading ? ' spinning' : ''}`}
+          onClick={refresh}
+          title="Refresh train data"
+        >
+          <RiRefreshLine size={13} />
+        </button>
+      </div>
+
+      <div className="transit-hints">
+        <span><span className="hud-kbd">Drag</span> rotate</span>
+        <span><span className="hud-kbd">Scroll</span> zoom</span>
+        <span><span className="hud-kbd">⌘K</span> search</span>
       </div>
     </div>
   )

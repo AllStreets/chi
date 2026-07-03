@@ -1,7 +1,8 @@
 // frontend/src/pages/HomePage.jsx
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RiWifiLine, RiRefreshLine } from 'react-icons/ri'
+import { RiWifiLine, RiRefreshLine, RiSearchLine } from 'react-icons/ri'
+import HudClock from '../components/hud/HudClock'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import IntelFeed from '../components/IntelFeed'
@@ -300,7 +301,11 @@ export default function HomePage() {
   const boundariesRef  = useRef(null)
   const [boundaries, setBoundaries] = useState(null)
   const navigate = useNavigate()
+  const orbitRef = useRef(false)
+  const [orbit, setOrbit] = useState(false)
   const GLIDE_MS = 8000
+
+  useEffect(() => { orbitRef.current = orbit }, [orbit])
 
   const { trains, loading, refresh }          = useCTA()
   const { weather, lake }                     = useWeather()
@@ -339,13 +344,18 @@ export default function HomePage() {
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
       center: CENTER,
-      zoom: ZOOM,
-      pitch: 45,
-      bearing: -17.6,
+      zoom: ZOOM - 1.6,
+      pitch: 62,
+      bearing: 24,
       antialias: true,
     })
 
     map.on('load', async () => {
+      // Cinematic approach into Streeterville on first load
+      map.flyTo?.({
+        center: CENTER, zoom: ZOOM, pitch: 45, bearing: -17.6,
+        duration: 4500, essential: false,
+      })
       const layers = map.getStyle().layers
       const labelLayer = layers.find(l => l.type === 'symbol' && l.layout?.['text-field'])
 
@@ -536,6 +546,11 @@ export default function HomePage() {
         glowPhase += 0.006
         ringPhase += 0.03
 
+        // Orbit mode — slow cinematic rotation
+        if (orbitRef.current && !map.isMoving()) {
+          map.setBearing(map.getBearing() + 0.025)
+        }
+
         if (map.getLayer('cta-routes-glow')) {
           const glow = 0.28 + Math.sin(glowPhase) * 0.12
           map.setPaintProperty('cta-routes-glow', 'line-opacity', glow)
@@ -623,18 +638,44 @@ export default function HomePage() {
       {MAPBOX_TOKEN
         ? <div ref={mapContainer} className="home-map" />
         : <div className="home-map"><MapPlaceholder /></div>}
+      <div className="home-vignette" />
       <div className="home-map-overlay">
-        <span className="home-live-badge">
-          <RiWifiLine size={9} />
-          LIVE CTA DATA
-        </span>
-        <button
-          className={`home-refresh-btn${loading ? ' spinning' : ''}`}
-          onClick={refresh}
-          title="Refresh train data"
-        >
-          <RiRefreshLine size={13} />
-        </button>
+        <div className="home-brand-chip hud-panel">
+          <span className="home-brand-name">CHI&nbsp;ATLAS</span>
+          <span className="home-brand-sub">STREETERVILLE&nbsp;·&nbsp;41.892°N&nbsp;87.617°W</span>
+          <HudClock />
+        </div>
+        <div className="home-badge-row">
+          <span className="hud-chip live">
+            <span className="dot" />
+            <RiWifiLine size={10} />
+            LIVE CTA DATA
+          </span>
+          <button
+            className={`home-refresh-btn${loading ? ' spinning' : ''}`}
+            onClick={refresh}
+            title="Refresh train data"
+          >
+            <RiRefreshLine size={13} />
+          </button>
+        </div>
+      </div>
+      <button
+        className="home-search-pill"
+        onClick={() => window.dispatchEvent(new Event('chi:open-palette'))}
+      >
+        <RiSearchLine size={13} />
+        <span>Search pages, places, transit…</span>
+        <span className="hud-kbd">⌘K</span>
+      </button>
+      <div className="home-mode-pills">
+        <button className={`hud-pill${orbit ? '' : ' active'}`} onClick={() => setOrbit(false)}>Free</button>
+        <button className={`hud-pill${orbit ? ' active' : ''}`} onClick={() => setOrbit(true)}>Orbit</button>
+      </div>
+      <div className="home-hints">
+        <span><span className="hud-kbd">Drag</span> rotate</span>
+        <span><span className="hud-kbd">Scroll</span> zoom</span>
+        <span><span className="hud-kbd">⌘K</span> search</span>
       </div>
       <IntelFeed
         weather={weather} lake={lake} trains={trains}

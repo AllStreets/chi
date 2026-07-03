@@ -1,173 +1,214 @@
+/* frontend/src/pages/TransitPage.css — CHI ATLAS transit HUD */
 .transit-page {
+  position: relative;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
   background: var(--bg);
 }
 
-.transit-header {
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border);
+.transit-map {
+  position: absolute;
+  inset: 0;
+}
+
+/* Cinematic edge falloff over the map */
+.transit-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(2, 4, 9, 0.55) 100%),
+    linear-gradient(180deg, rgba(2, 4, 9, 0.35), transparent 18%, transparent 85%, rgba(2, 4, 9, 0.45));
+  z-index: 2;
+}
+
+/* ── Left line panel (Tokyo-Metro style) ─────────────────────────── */
+.transit-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 5;
+  width: 236px;
+  max-height: calc(100vh - 40px);
   display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.transit-live-controls {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.transit-live-badge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.transit-live-badge::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #10b981;
-  animation: transit-blink 1.4s ease-in-out infinite;
-  flex-shrink: 0;
-}
-
-@keyframes transit-blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.25; }
-}
-
-.transit-refresh-btn,
-.transit-bus-btn,
-.transit-bike-btn {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.3);
-  cursor: pointer;
-  padding: 3px 5px;
-  display: flex;
-  align-items: center;
-  transition: color 0.15s;
-  border-radius: 4px;
-}
-
-.transit-refresh-btn:hover { color: #00d4ff; }
-.transit-bus-btn:hover  { color: #f59e0b; }
-.transit-bus-btn.active  { color: #f59e0b; }
-.transit-bike-btn:hover  { color: #10b981; }
-.transit-bike-btn.active { color: #10b981; }
-
-@keyframes transit-spin { to { transform: rotate(360deg); } }
-.transit-refresh-btn.spinning svg { animation: transit-spin 1s linear infinite; }
-
-.transit-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.transit-sub {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.transit-layout {
-  flex: 1;
-  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-.transit-sidebar {
-  width: 200px;
-  border-right: 1px solid var(--border);
-  padding: 12px 0;
-  overflow-y: auto;
-  flex-shrink: 0;
+.transit-panel-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
-.transit-map { flex: 1; }
+.transit-panel-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  color: var(--text);
+  text-shadow: 0 0 22px rgba(var(--accent-rgb), 0.4);
+}
+
+.transit-clock-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.transit-clock-row .hud-clock {
+  font-size: 17px;
+  color: var(--text);
+}
+
+.transit-count {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.transit-count.loading { color: var(--text-faint); }
+
+.transit-lines {
+  padding: 10px 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.transit-lines-label {
+  display: block;
+  padding: 2px 8px 8px;
+}
 
 .line-card {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 16px;
+  padding: 7px 8px;
+  border-radius: var(--r-sm);
+  transition: background 0.15s;
 }
 
-.line-card:hover { background: rgba(0,212,255,0.04); }
+.line-card:hover { background: rgba(148, 187, 255, 0.06); }
 
-.line-card-dot {
-  width: 10px;
-  height: 10px;
+.line-card-badge {
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
   flex-shrink: 0;
-}
-
-.line-card-swatch {
-  width: 18px;
-  height: 4px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.line-card-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
 
 .line-card-name {
   font-size: 12px;
   font-weight: 500;
   color: var(--text);
+  flex: 1;
+  white-space: nowrap;
 }
 
 .line-card-count {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Popup overrides */
-.transit-map .mapboxgl-popup-content {
-  background: #0d1f3c;
-  border: 1px solid rgba(0,212,255,0.25);
-  border-radius: 6px;
-  padding: 10px 14px;
-  color: #e2e8f0;
-  font-family: var(--font-ui, sans-serif);
-  font-size: 13px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-  min-width: 120px;
+.transit-panel-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
 }
 
-.transit-map .mapboxgl-popup-content strong {
-  display: block;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 2px;
+/* ── Top-right control cluster ───────────────────────────────────── */
+.transit-controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.transit-map .mapboxgl-popup-content small {
-  color: rgba(0,212,255,0.7);
-  font-size: 11px;
+.transit-ctl-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
-.transit-map .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip { border-top-color:    #0d1f3c; }
-.transit-map .mapboxgl-popup-anchor-top    .mapboxgl-popup-tip { border-bottom-color: #0d1f3c; }
-.transit-map .mapboxgl-popup-anchor-left   .mapboxgl-popup-tip { border-right-color:  #0d1f3c; }
-.transit-map .mapboxgl-popup-anchor-right  .mapboxgl-popup-tip { border-left-color:   #0d1f3c; }
+.transit-ctl-btn:hover { color: var(--text); border-color: var(--border-strong); }
+
+.transit-ctl-btn.active {
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.5);
+  box-shadow: var(--glow-accent);
+}
+
+.transit-ctl-btn.spinning svg { animation: transit-spin 0.8s linear infinite; }
+
+@keyframes transit-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Bottom hint bar ─────────────────────────────────────────────── */
+.transit-hints {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  font-size: 10.5px;
+  color: var(--text-faint);
+}
+
+.transit-hints span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Mapbox popup theming (shared by map pages) */
+.transit-page .mapboxgl-popup-content {
+  background: var(--panel-solid);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--font-ui);
+  box-shadow: var(--shadow-panel);
+}
+
+.transit-page .mapboxgl-popup-tip { border-top-color: var(--border-strong); }
+
+@media (max-width: 720px) {
+  .transit-panel { width: 200px; top: 12px; left: 12px; }
+  .transit-hints { display: none; }
+}

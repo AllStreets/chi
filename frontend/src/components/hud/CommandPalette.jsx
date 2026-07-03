@@ -58,8 +58,13 @@ export default function CommandPalette() {
         close()
       }
     }
+    const openHandler = () => setOpen(true)
     window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    window.addEventListener('chi:open-palette', openHandler)
+    return () => {
+      window.removeEventListener('keydown', handler)
+      window.removeEventListener('chi:open-palette', openHandler)
+    }
   }, [close])
 
   useEffect(() => {

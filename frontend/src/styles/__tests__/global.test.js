@@ -17,11 +17,15 @@ describe('global.css design tokens', () => {
     })
   })
 
-  it('imports Space Grotesk font', () => {
-    expect(css).toContain('Space+Grotesk')
+  it('uses Archivo as the UI font', () => {
+    expect(css).toContain("'Archivo'")
   })
 
-  it('imports JetBrains Mono font', () => {
-    expect(css).toContain('JetBrains+Mono')
+  it('uses IBM Plex Mono as the data font', () => {
+    expect(css).toContain("'IBM Plex Mono'")
+  })
+
+  it('uses Michroma as the display font', () => {
+    expect(css).toContain("'Michroma'")
   })
 })
