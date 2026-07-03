@@ -1,15 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
 import { RiHeartLine, RiHeartFill, RiCheckboxCircleLine, RiMusicFill, RiBuildingLine } from 'react-icons/ri'
 import useYelp from '../hooks/useYelp'
+import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
 import { addFavorite, removeFavorite, addVisited, removeVisited } from '../hooks/useMe'
 import MapPlaceholder from '../components/MapPlaceholder'
 import { makeMapPin } from '../utils/mapIcons'
 import './NightlifePage.css'
-
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || ''
-if (MAPBOX_TOKEN) mapboxgl.accessToken = MAPBOX_TOKEN
 
 // Inline SVG icon components — exact shapes for each category
 const AllIcon       = () => <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
@@ -71,8 +67,6 @@ function toGeoJSON(places, catKey) {
 }
 
 export default function NightlifePage() {
-  const mapContainer = useRef(null)
-  const mapRef       = useRef(null)
   const placesRef    = useRef([])
   const catRef       = useRef('nightlife_all')
   const [cat, setCat]     = useState('nightlife_all')
@@ -80,17 +74,11 @@ export default function NightlifePage() {
 
   const { places, loading } = useYelp({ type: cat })
 
-  useEffect(() => {
-    if (mapRef.current || !MAPBOX_TOKEN) return
-    const map = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: [-87.645, 41.920],
-      zoom: 11.8,
-      pitch: 20,
-    })
-
-    map.on('load', () => {
+  const { containerRef, mapRef } = useAtlasMap({
+    center: [-87.645, 41.920],
+    zoom: 11.8,
+    pitch: 20,
+    onLoad: (map) => {
       // Register one icon per category + defaults for "all"
       CATEGORIES.filter(c => c.shape).forEach(c => {
         if (!map.hasImage(`nl-${c.key}`)) map.addImage(`nl-${c.key}`, makeMapPin(c.shape, c.color), { pixelRatio: 2 })
@@ -146,15 +134,8 @@ export default function NightlifePage() {
       })
       map.on('mouseenter', 'nl-icons', () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', 'nl-icons', () => { map.getCanvas().style.cursor = '' })
-    })
-
-    mapRef.current = map
-
-    const ro = new ResizeObserver(() => mapRef.current?.resize())
-    ro.observe(mapContainer.current)
-
-    return () => { ro.disconnect(); map.remove(); mapRef.current = null }
-  }, [])
+    },
+  })
 
   // Update icons whenever places change — source existence check replaces isStyleLoaded()
   useEffect(() => {
@@ -176,7 +157,7 @@ export default function NightlifePage() {
   return (
     <div className="nightlife-page">
       {MAPBOX_TOKEN
-        ? <div ref={mapContainer} className="nightlife-map" />
+        ? <div ref={containerRef} className="nightlife-map" />
         : <div className="nightlife-map"><MapPlaceholder /></div>}
       <div className="nightlife-vignette" />
 

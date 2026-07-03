@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RiWifiLine, RiRefreshLine, RiSearchLine } from 'react-icons/ri'
 import HudClock from '../components/hud/HudClock'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
 import IntelFeed from '../components/IntelFeed'
 import MapPlaceholder from '../components/MapPlaceholder'
 import useCTA from '../hooks/useCTA'
@@ -14,9 +13,6 @@ import useYelp from '../hooks/useYelp'
 import { makeMapPin } from '../utils/mapIcons'
 import useHomeFeed from '../hooks/useHomeFeed'
 import './HomePage.css'
-
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || ''
-if (MAPBOX_TOKEN) mapboxgl.accessToken = MAPBOX_TOKEN
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 const CENTER = [-87.6172, 41.8921]
@@ -290,10 +286,8 @@ function wireNeighborhoodEvents(map, navigate) {
 let _routesCache = null
 
 export default function HomePage() {
-  const mapContainer   = useRef(null)
-  const mapRef         = useRef(null)
   const pulseRef       = useRef(null)
-  const rafRef         = useRef(null)
+  const phaseRef       = useRef({ glow: 0, ring: 0 })
   const trainDataRef   = useRef([])
   const trainStateRef  = useRef(sharedTrainState)
   const foodRef        = useRef([])
@@ -338,19 +332,12 @@ export default function HomePage() {
     })
   }, [trains])
 
-  useEffect(() => {
-    if (mapRef.current || !MAPBOX_TOKEN) return
-    const map = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: CENTER,
-      zoom: ZOOM - 1.6,
-      pitch: 62,
-      bearing: 24,
-      antialias: true,
-    })
-
-    map.on('load', async () => {
+  const { containerRef, mapRef } = useAtlasMap({
+    center: CENTER,
+    zoom: ZOOM - 1.6,
+    pitch: 62,
+    bearing: 24,
+    onLoad: async (map) => {
       // Cinematic approach into Streeterville on first load
       map.flyTo?.({
         center: CENTER, zoom: ZOOM, pitch: 45, bearing: -17.6,
@@ -540,64 +527,53 @@ export default function HomePage() {
       })
       pulseRef.current = new mapboxgl.Marker({ element: el, anchor: 'center' }).setLngLat(CENTER).addTo(map)
 
-      // Animation loop — glow breathing + ring pulsing + smooth train position lerp
-      let glowPhase = 0, ringPhase = 0
-      const animate = () => {
-        glowPhase += 0.006
-        ringPhase += 0.03
+    },
+    onFrame: (map) => {
+      const phase = phaseRef.current
+      phase.glow += 0.006
+      phase.ring += 0.03
 
-        // Orbit mode — slow cinematic rotation
-        if (orbitRef.current && !map.isMoving()) {
-          map.setBearing(map.getBearing() + 0.025)
-        }
-
-        if (map.getLayer('cta-routes-glow')) {
-          const glow = 0.28 + Math.sin(glowPhase) * 0.12
-          map.setPaintProperty('cta-routes-glow', 'line-opacity', glow)
-          map.setPaintProperty('cta-routes-atmo', 'line-opacity', 0.04 + Math.sin(glowPhase) * 0.04)
-        }
-        if (map.getLayer('cta-train-ring')) {
-          const halo = 0.07 + (1 + Math.sin(ringPhase)) / 2 * 0.13
-          map.setPaintProperty('cta-train-ring', 'circle-opacity', halo)
-        }
-
-        const now = Date.now()
-        const states = trainStateRef.current
-        const trainList = trainDataRef.current
-        if (trainList.length > 0) {
-          for (const state of Object.values(states)) {
-            const t = Math.min((now - state.startTime) / GLIDE_MS, 1)
-            const p = 1 - Math.pow(1 - t, 3)  // cubic ease-out
-            state.lat = state.fromLat + (state.toLat - state.fromLat) * p
-            state.lon = state.fromLon + (state.toLon - state.fromLon) * p
-          }
-          if (map.getSource('cta-trains') && map.isStyleLoaded()) {
-            map.getSource('cta-trains').setData({
-              type: 'FeatureCollection',
-              features: trainList.map(t => {
-                const s = states[t.rn]
-                return {
-                  type: 'Feature',
-                  geometry: { type: 'Point', coordinates: [s?.lon ?? t.lon, s?.lat ?? t.lat] },
-                  properties: { rn: t.rn, line: t.line, color: LINE_COLOR_MAP[t.line] || '#00d4ff' }
-                }
-              })
-            })
-          }
-        }
-
-        rafRef.current = requestAnimationFrame(animate)
+      // Orbit mode — slow cinematic rotation
+      if (orbitRef.current && !map.isMoving()) {
+        map.setBearing(map.getBearing() + 0.025)
       }
-      rafRef.current = requestAnimationFrame(animate)
-    })
 
-    mapRef.current = map
-    return () => {
-      cancelAnimationFrame(rafRef.current)
-      if (pulseRef.current) { pulseRef.current.remove(); pulseRef.current = null }
-      map.remove(); mapRef.current = null
-    }
-  }, [])
+      if (map.getLayer('cta-routes-glow')) {
+        const glow = 0.28 + Math.sin(phase.glow) * 0.12
+        map.setPaintProperty('cta-routes-glow', 'line-opacity', glow)
+        map.setPaintProperty('cta-routes-atmo', 'line-opacity', 0.04 + Math.sin(phase.glow) * 0.04)
+      }
+      if (map.getLayer('cta-train-ring')) {
+        const halo = 0.07 + (1 + Math.sin(phase.ring)) / 2 * 0.13
+        map.setPaintProperty('cta-train-ring', 'circle-opacity', halo)
+      }
+
+      const now = Date.now()
+      const states = trainStateRef.current
+      const trainList = trainDataRef.current
+      if (trainList.length > 0) {
+        for (const state of Object.values(states)) {
+          const t = Math.min((now - state.startTime) / GLIDE_MS, 1)
+          const p = 1 - Math.pow(1 - t, 3)  // cubic ease-out
+          state.lat = state.fromLat + (state.toLat - state.fromLat) * p
+          state.lon = state.fromLon + (state.toLon - state.fromLon) * p
+        }
+        if (map.getSource('cta-trains') && map.isStyleLoaded()) {
+          map.getSource('cta-trains').setData({
+            type: 'FeatureCollection',
+            features: trainList.map(t => {
+              const s = states[t.rn]
+              return {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [s?.lon ?? t.lon, s?.lat ?? t.lat] },
+                properties: { rn: t.rn, line: t.line, color: LINE_COLOR_MAP[t.line] || '#00d4ff' }
+              }
+            })
+          })
+        }
+      }
+    },
+  })
 
   // Update food layer
   useEffect(() => {
@@ -636,7 +612,7 @@ export default function HomePage() {
   return (
     <div className="home-page">
       {MAPBOX_TOKEN
-        ? <div ref={mapContainer} className="home-map" />
+        ? <div ref={containerRef} className="home-map" />
         : <div className="home-map"><MapPlaceholder /></div>}
       <div className="home-vignette" />
       <div className="home-map-overlay">

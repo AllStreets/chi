@@ -1,15 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
 import { RiWifiLine, RiRefreshLine, RiBusLine, RiBikeLine } from 'react-icons/ri'
 import HudClock from '../components/hud/HudClock'
 import useCTA from '../hooks/useCTA'
+import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
 import { sharedTrainState } from '../hooks/trainAnimState'
 import MapPlaceholder from '../components/MapPlaceholder'
 import './TransitPage.css'
-
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || ''
-if (MAPBOX_TOKEN) mapboxgl.accessToken = MAPBOX_TOKEN
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 const LINE_COLOR_MAP = {
@@ -37,11 +33,9 @@ const LINES = [
 let _routesCache = null
 
 export default function TransitPage() {
-  const mapContainer  = useRef(null)
-  const mapRef        = useRef(null)
-  const rafRef        = useRef(null)
   const trainDataRef  = useRef([])
   const trainStateRef = useRef(sharedTrainState)   // shared with HomePage — no position reset on navigate
+  const phaseRef      = useRef({ glow: 0, ring: 0 })
   const GLIDE_MS = 14000
   const { trains, loading, refresh } = useCTA()
   const [showBuses, setShowBuses]   = useState(false)
@@ -65,17 +59,10 @@ export default function TransitPage() {
     })
   }, [trains])
 
-  useEffect(() => {
-    if (mapRef.current || !MAPBOX_TOKEN) return
-    const map = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: [-87.6298, 41.8781],
-      zoom: 11, pitch: 42, bearing: -12,
-      antialias: true,
-    })
-
-    map.on('load', () => {
+  const { containerRef, mapRef } = useAtlasMap({
+    center: [-87.6298, 41.8781],
+    zoom: 11, pitch: 42, bearing: -12,
+    onLoad: (map) => {
       // CTA route lines
       map.addSource('cta-routes', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
       ((_routesCache
@@ -191,56 +178,46 @@ export default function TransitPage() {
       map.on('mouseenter', 'bus-dots', () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', 'bus-dots', () => { map.getCanvas().style.cursor = '' })
 
-      // Animation loop
-      let glowPhase = 0, ringPhase = 0
-      const animate = () => {
-        glowPhase += 0.006; ringPhase += 0.03
+    },
+    onFrame: (map) => {
+      const phase = phaseRef.current
+      phase.glow += 0.006; phase.ring += 0.03
 
-        if (map.getLayer('cta-routes-glow')) {
-          const op = Math.max(0, 0.10 + Math.sin(glowPhase) * 0.16)
-          map.setPaintProperty('cta-routes-glow', 'line-opacity', op)
-          map.setPaintProperty('cta-routes-atmo', 'line-opacity', Math.max(0, 0.04 + Math.sin(glowPhase) * 0.06))
-        }
-        if (map.getLayer('train-ring')) {
-          map.setPaintProperty('train-ring', 'circle-radius', 6 + Math.sin(ringPhase) * 4)
-          map.setPaintProperty('train-ring', 'circle-stroke-opacity', Math.max(0, 0.08 + Math.sin(ringPhase) * 0.25))
-        }
-
-        const now = Date.now()
-        const states = trainStateRef.current
-        const trainList = trainDataRef.current
-        if (trainList.length > 0) {
-          for (const state of Object.values(states)) {
-            const p = Math.min((now - state.startTime) / GLIDE_MS, 1)
-            state.lat = state.fromLat + (state.toLat - state.fromLat) * p
-            state.lon = state.fromLon + (state.toLon - state.fromLon) * p
-          }
-          if (map.getSource('trains') && map.isStyleLoaded()) {
-            map.getSource('trains').setData({
-              type: 'FeatureCollection',
-              features: trainList.map(t => {
-                const s = states[t.rn]
-                return {
-                  type: 'Feature',
-                  geometry: { type: 'Point', coordinates: [s?.lon ?? t.lon, s?.lat ?? t.lat] },
-                  properties: { rn: t.rn, line: t.line, color: LINE_COLOR_MAP[t.line] || '#00d4ff' }
-                }
-              })
-            })
-          }
-        }
-        rafRef.current = requestAnimationFrame(animate)
+      if (map.getLayer('cta-routes-glow')) {
+        const op = Math.max(0, 0.10 + Math.sin(phase.glow) * 0.16)
+        map.setPaintProperty('cta-routes-glow', 'line-opacity', op)
+        map.setPaintProperty('cta-routes-atmo', 'line-opacity', Math.max(0, 0.04 + Math.sin(phase.glow) * 0.06))
       }
-      rafRef.current = requestAnimationFrame(animate)
-    })
+      if (map.getLayer('train-ring')) {
+        map.setPaintProperty('train-ring', 'circle-radius', 6 + Math.sin(phase.ring) * 4)
+        map.setPaintProperty('train-ring', 'circle-stroke-opacity', Math.max(0, 0.08 + Math.sin(phase.ring) * 0.25))
+      }
 
-    mapRef.current = map
-
-    const ro = new ResizeObserver(() => mapRef.current?.resize())
-    ro.observe(mapContainer.current)
-
-    return () => { ro.disconnect(); cancelAnimationFrame(rafRef.current); map.remove(); mapRef.current = null }
-  }, [])
+      const now = Date.now()
+      const states = trainStateRef.current
+      const trainList = trainDataRef.current
+      if (trainList.length > 0) {
+        for (const state of Object.values(states)) {
+          const p = Math.min((now - state.startTime) / GLIDE_MS, 1)
+          state.lat = state.fromLat + (state.toLat - state.fromLat) * p
+          state.lon = state.fromLon + (state.toLon - state.fromLon) * p
+        }
+        if (map.getSource('trains') && map.isStyleLoaded()) {
+          map.getSource('trains').setData({
+            type: 'FeatureCollection',
+            features: trainList.map(t => {
+              const s = states[t.rn]
+              return {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [s?.lon ?? t.lon, s?.lat ?? t.lat] },
+                properties: { rn: t.rn, line: t.line, color: LINE_COLOR_MAP[t.line] || '#00d4ff' }
+              }
+            })
+          })
+        }
+      }
+    },
+  })
 
   // Bus fetch effect
   useEffect(() => {
@@ -283,7 +260,7 @@ export default function TransitPage() {
   return (
     <div className="transit-page">
       {MAPBOX_TOKEN
-        ? <div ref={mapContainer} className="transit-map" />
+        ? <div ref={containerRef} className="transit-map" />
         : <div className="transit-map"><MapPlaceholder /></div>}
       <div className="transit-vignette" />
 

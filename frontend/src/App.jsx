@@ -1,26 +1,41 @@
 // frontend/src/App.jsx
-import { Component, useEffect } from 'react'
+import { Component, Suspense, lazy, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import CommandPalette from './components/hud/CommandPalette'
-import HomePage from './pages/HomePage'
-import TransitPage from './pages/TransitPage'
-import FoodPage from './pages/FoodPage'
-import NeighborhoodsPage from './pages/NeighborhoodsPage'
-import NightlifePage from './pages/NightlifePage'
-import SportsPage from './pages/SportsPage'
-import EventsPage from './pages/EventsPage'
-import ExplorePage from './pages/ExplorePage'
-import WeatherPage from './pages/WeatherPage'
-import MyChicagoPage from './pages/MyChicagoPage'
-import TonightPage from './pages/TonightPage'
-import BeachPage from './pages/BeachPage'
-import ReportsPage from './pages/ReportsPage'
-import FinancePage from './pages/FinancePage'
-import PoliticsPage from './pages/PoliticsPage'
-import HealthPage from './pages/HealthPage'
-import SettingsPage from './pages/SettingsPage'
 import './App.css'
+
+// Route-level code splitting — keeps mapbox-gl and page chunks out of the
+// initial bundle so first paint only ships the shell.
+const HomePage          = lazy(() => import('./pages/HomePage'))
+const TransitPage       = lazy(() => import('./pages/TransitPage'))
+const FoodPage          = lazy(() => import('./pages/FoodPage'))
+const NeighborhoodsPage = lazy(() => import('./pages/NeighborhoodsPage'))
+const NightlifePage     = lazy(() => import('./pages/NightlifePage'))
+const SportsPage        = lazy(() => import('./pages/SportsPage'))
+const EventsPage        = lazy(() => import('./pages/EventsPage'))
+const ExplorePage       = lazy(() => import('./pages/ExplorePage'))
+const WeatherPage       = lazy(() => import('./pages/WeatherPage'))
+const MyChicagoPage     = lazy(() => import('./pages/MyChicagoPage'))
+const TonightPage       = lazy(() => import('./pages/TonightPage'))
+const BeachPage         = lazy(() => import('./pages/BeachPage'))
+const ReportsPage       = lazy(() => import('./pages/ReportsPage'))
+const FinancePage       = lazy(() => import('./pages/FinancePage'))
+const PoliticsPage      = lazy(() => import('./pages/PoliticsPage'))
+const HealthPage        = lazy(() => import('./pages/HealthPage'))
+const SettingsPage      = lazy(() => import('./pages/SettingsPage'))
+
+function PageLoader() {
+  return (
+    <div style={{
+      height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.3em',
+      color: 'var(--text-faint)', textTransform: 'uppercase',
+    }}>
+      <span className="hud-chip live"><span className="dot" />Loading sector…</span>
+    </div>
+  )
+}
 
 class PageBoundary extends Component {
   constructor(props) { super(props); this.state = { err: null } }
@@ -81,6 +96,7 @@ export default function App() {
       <CommandPalette />
       <main className="main-content">
         <PageBoundary>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/"              element={<HomePage />} />
             <Route path="/transit"       element={<TransitPage />} />
@@ -100,6 +116,7 @@ export default function App() {
             <Route path="/health"        element={<HealthPage />} />
             <Route path="/settings"      element={<SettingsPage />} />
           </Routes>
+          </Suspense>
         </PageBoundary>
       </main>
     </BrowserRouter>

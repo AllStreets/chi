@@ -1,15 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
 import { RiHeartLine, RiHeartFill, RiCheckboxCircleLine } from 'react-icons/ri'
 import useYelp from '../hooks/useYelp'
+import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
 import { addFavorite, removeFavorite, addVisited, removeVisited } from '../hooks/useMe'
 import MapPlaceholder from '../components/MapPlaceholder'
 import { makeMapPin } from '../utils/mapIcons'
 import './FoodPage.css'
-
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || ''
-if (MAPBOX_TOKEN) mapboxgl.accessToken = MAPBOX_TOKEN
 
 const TYPES = ['all', 'restaurants', 'bars', 'cafes', 'pizza', 'sushi', 'tacos', 'brunch']
 
@@ -57,25 +53,16 @@ function toGeoJSON(places) {
 }
 
 export default function FoodPage() {
-  const mapContainer = useRef(null)
-  const mapRef       = useRef(null)
   const placesRef    = useRef([])   // latest places, readable inside map callbacks
   const [type, setType]   = useState('all')
   const [saved, setSaved] = useState({})
   const { places, loading } = useYelp({ type })
 
-  // Init map once
-  useEffect(() => {
-    if (mapRef.current || !MAPBOX_TOKEN) return
-    const map = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: [-87.6197, 41.8919],
-      zoom: 13,
-      pitch: 30,
-    })
-
-    map.on('load', () => {
+  const { containerRef, mapRef } = useAtlasMap({
+    center: [-87.6197, 41.8919],
+    zoom: 13,
+    pitch: 30,
+    onLoad: (map) => {
       // Canvas icons — synchronous, no async loading issues
       map.addImage('food-icon', makeMapPin('fork',    '#00d4ff'), { pixelRatio: 2 })
       map.addImage('bar-icon',  makeMapPin('martini', '#7c3aed'), { pixelRatio: 2 })
@@ -112,15 +99,8 @@ export default function FoodPage() {
       })
       map.on('mouseenter', 'place-icons', () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', 'place-icons', () => { map.getCanvas().style.cursor = '' })
-    })
-
-    mapRef.current = map
-
-    const ro = new ResizeObserver(() => mapRef.current?.resize())
-    ro.observe(mapContainer.current)
-
-    return () => { ro.disconnect(); map.remove(); mapRef.current = null }
-  }, [])
+    },
+  })
 
   // Update markers whenever places changes
   useEffect(() => {
@@ -134,7 +114,7 @@ export default function FoodPage() {
 
   return (
     <div className="food-page">
-      {MAPBOX_TOKEN ? <div ref={mapContainer} className="food-map" /> : <div className="food-map"><MapPlaceholder /></div>}
+      {MAPBOX_TOKEN ? <div ref={containerRef} className="food-map" /> : <div className="food-map"><MapPlaceholder /></div>}
       <div className="food-vignette" />
 
       <aside className="food-panel hud-panel hud-rise">
