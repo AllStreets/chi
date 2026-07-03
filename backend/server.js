@@ -40,6 +40,10 @@ app.get('/api/settings/health', (_req, res) => {
 })
 
 app.use('/api/cta',           require('./routes/cta'))
+// Same prefix as cta.js — no path collision: cta.js has no /stations route, so
+// requests to /api/cta/stations fall through to this router.
+app.use('/api/cta',           require('./routes/stations').router)
+app.use('/api/search',        require('./routes/search'))
 app.use('/api/weather',       require('./routes/weather'))
 app.use('/api/lake',          require('./routes/lake'))
 app.use('/api/places',        require('./routes/yelp'))

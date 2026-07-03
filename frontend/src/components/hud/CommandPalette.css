@@ -111,6 +111,29 @@
   font-family: var(--font-mono);
 }
 
+/* Deep-search section headers — hairline-separated kind groups */
+.cmdk-section {
+  padding: 10px 12px 5px;
+  margin-top: 5px;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+
+.cmdk-section:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 6px;
+}
+
+.cmdk-searching {
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+  animation: hud-pulse 1.4s ease-in-out infinite;
+}
+
 .cmdk-footer {
   display: flex;
   align-items: center;

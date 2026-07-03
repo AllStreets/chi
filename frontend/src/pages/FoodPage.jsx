@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { RiHeartLine, RiHeartFill, RiCheckboxCircleLine } from 'react-icons/ri'
 import useYelp from '../hooks/useYelp'
 import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
+import useMapFocus from '../hooks/useMapFocus'
 import { addFavorite, removeFavorite, addVisited, removeVisited } from '../hooks/useMe'
 import MapPlaceholder from '../components/MapPlaceholder'
 import { makeMapPin } from '../utils/mapIcons'
@@ -101,6 +102,8 @@ export default function FoodPage() {
       map.on('mouseleave', 'place-icons', () => { map.getCanvas().style.cursor = '' })
     },
   })
+
+  useMapFocus(mapRef)
 
   // Update markers whenever places changes
   useEffect(() => {

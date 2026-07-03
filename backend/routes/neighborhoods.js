@@ -248,3 +248,5 @@ router.get('/:id', (req, res) => {
 })
 
 module.exports = router
+// Expose the static data for other routes (e.g. routes/search.js)
+module.exports.NEIGHBORHOODS = NEIGHBORHOODS

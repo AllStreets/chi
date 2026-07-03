@@ -17,6 +17,7 @@ export default function useAtlasMap({
   pitch = 0,
   bearing = 0,
   antialias = true,
+  config,          // Mapbox Standard style config (e.g. basemap lightPreset)
   onLoad,
   onFrame,
 } = {}) {
@@ -36,8 +37,10 @@ export default function useAtlasMap({
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style, center, zoom, pitch, bearing, antialias,
+      ...(config ? { config } : {}),
     })
     mapRef.current = map
+    if (import.meta.env.DEV) window.__atlasMap = map
 
     map.on('load', () => {
       onLoadRef.current?.(map)

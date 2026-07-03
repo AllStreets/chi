@@ -3,6 +3,7 @@ import { RiWifiLine, RiRefreshLine, RiBusLine, RiBikeLine } from 'react-icons/ri
 import HudClock from '../components/hud/HudClock'
 import useCTA from '../hooks/useCTA'
 import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
+import useMapFocus from '../hooks/useMapFocus'
 import { sharedTrainState } from '../hooks/trainAnimState'
 import MapPlaceholder from '../components/MapPlaceholder'
 import './TransitPage.css'
@@ -218,6 +219,8 @@ export default function TransitPage() {
       }
     },
   })
+
+  useMapFocus(mapRef)
 
   // Bus fetch effect
   useEffect(() => {

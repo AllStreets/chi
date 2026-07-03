@@ -25,6 +25,18 @@
   background:
     radial-gradient(125% 95% at 50% 45%, transparent 58%, rgba(2, 4, 9, 0.5) 100%),
     linear-gradient(180deg, rgba(2, 4, 9, 0.32), transparent 16%, transparent 86%, rgba(2, 4, 9, 0.42));
+  transition: box-shadow 1.2s ease;
+}
+
+/* Atmosphere tint per lighting preset — sells the sun/moon angle */
+.home-page[data-light='dawn'] .home-vignette {
+  box-shadow: inset 0 0 220px rgba(255, 158, 110, 0.18);
+}
+.home-page[data-light='dusk'] .home-vignette {
+  box-shadow: inset 0 0 220px rgba(255, 132, 64, 0.16);
+}
+.home-page[data-light='night'] .home-vignette {
+  box-shadow: inset 0 0 220px rgba(88, 128, 230, 0.10);
 }
 
 /* Top-left stack: brand chip + live badge */
@@ -135,6 +147,21 @@
   z-index: 10;
   display: flex;
   gap: 6px;
+}
+
+/* Lighting preset pills — under the mode pills */
+.home-light-pills {
+  position: absolute;
+  top: 54px;
+  right: 288px;
+  z-index: 10;
+  display: flex;
+  gap: 6px;
+}
+
+.home-light-pills .hud-pill {
+  font-size: 9.5px;
+  padding: 4px 10px;
 }
 
 /* Bottom hint bar */

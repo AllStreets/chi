@@ -18,6 +18,19 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 const CENTER = [-87.6172, 41.8921]
 const ZOOM   = 13.5
 
+const LIGHT_PRESETS = ['dawn', 'day', 'dusk', 'night']
+
+// Default lighting from Chicago local time — rough solar bands
+function solarPreset() {
+  const hour = Number(new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Chicago', hour: 'numeric', hour12: false,
+  }).format(new Date()))
+  if (hour >= 5 && hour < 8)   return 'dawn'
+  if (hour >= 8 && hour < 17)  return 'day'
+  if (hour >= 17 && hour < 20) return 'dusk'
+  return 'night'
+}
+
 const LINE_COLOR_MAP = {
   Red: '#ff0033', Blue: '#3b82f6', Brn: '#92400e',
   G: '#10b981', Org: '#f97316', P: '#8b5cf6',
@@ -229,23 +242,21 @@ function toNlGeoJSON(places) {
 
 function addNeighborhoodLayers(map, data) {
   if (map.getSource('neighborhood-boundaries')) return
-  const layers = map.getStyle().layers
-  const labelLayer = layers.find(l => l.type === 'symbol' && l.layout?.['text-field'])
-  const beforeId = labelLayer?.id
-
   map.addSource('neighborhood-boundaries', { type: 'geojson', data })
   map.addLayer({
     id: 'neighborhood-fill',
     type: 'fill',
+    slot: 'middle',
     source: 'neighborhood-boundaries',
     paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.15 },
-  }, beforeId)
+  })
   map.addLayer({
     id: 'neighborhood-line',
     type: 'line',
+    slot: 'middle',
     source: 'neighborhood-boundaries',
     paint: { 'line-color': ['get', 'color'], 'line-opacity': 0.5, 'line-width': 1.5 },
-  }, beforeId)
+  })
 }
 
 const ICON_LAYERS = ['home-food-icons', 'home-nl-icons', 'stadium-icons', 'cta-train-dots', 'cta-train-ring']
@@ -297,9 +308,15 @@ export default function HomePage() {
   const navigate = useNavigate()
   const orbitRef = useRef(false)
   const [orbit, setOrbit] = useState(false)
+  const [preset, setPreset] = useState(solarPreset)
   const GLIDE_MS = 8000
 
   useEffect(() => { orbitRef.current = orbit }, [orbit])
+
+  // Apply lighting preset to the Standard basemap
+  useEffect(() => {
+    mapRef.current?.setConfigProperty?.('basemap', 'lightPreset', preset)
+  }, [preset]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { trains, loading, refresh }          = useCTA()
   const { weather, lake }                     = useWeather()
@@ -333,6 +350,8 @@ export default function HomePage() {
   }, [trains])
 
   const { containerRef, mapRef } = useAtlasMap({
+    style: 'mapbox://styles/mapbox/standard',
+    config: { basemap: { lightPreset: solarPreset() } },
     center: CENTER,
     zoom: ZOOM - 1.6,
     pitch: 62,
@@ -343,20 +362,8 @@ export default function HomePage() {
         center: CENTER, zoom: ZOOM, pitch: 45, bearing: -17.6,
         duration: 4500, essential: false,
       })
-      const layers = map.getStyle().layers
-      const labelLayer = layers.find(l => l.type === 'symbol' && l.layout?.['text-field'])
-
-      // 3D buildings
-      map.addLayer({
-        id: '3d-buildings', source: 'composite', 'source-layer': 'building',
-        filter: ['==', 'extrude', 'true'], type: 'fill-extrusion', minzoom: 12,
-        paint: {
-          'fill-extrusion-color': '#0f1f3a',
-          'fill-extrusion-height': ['get', 'height'],
-          'fill-extrusion-base': ['get', 'min_height'],
-          'fill-extrusion-opacity': 0.8,
-        },
-      }, labelLayer?.id)
+      // Mapbox Standard ships its own 3D buildings + lighting; custom layers
+      // go into slots ('middle' under labels, 'top' above everything).
 
       // CTA routes
       map.addSource('cta-routes', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
@@ -374,32 +381,32 @@ export default function HomePage() {
         'rgba(0,0,0,0)',
         ['get', 'color'],
       ]
-      map.addLayer({ id: 'cta-routes-atmo', type: 'line', source: 'cta-routes',
+      map.addLayer({ id: 'cta-routes-atmo', type: 'line', slot: 'middle', source: 'cta-routes',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': noGlowColor, 'line-width': 24, 'line-blur': 18, 'line-opacity': 0.04 },
-      }, labelLayer?.id)
-      map.addLayer({ id: 'cta-routes-glow', type: 'line', source: 'cta-routes',
+      })
+      map.addLayer({ id: 'cta-routes-glow', type: 'line', slot: 'middle', source: 'cta-routes',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': noGlowColor, 'line-width': 5, 'line-blur': 2, 'line-opacity': 0.22 },
-      }, labelLayer?.id)
-      map.addLayer({ id: 'cta-routes-solid', type: 'line', source: 'cta-routes',
+      })
+      map.addLayer({ id: 'cta-routes-solid', type: 'line', slot: 'middle', source: 'cta-routes',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': ['get', 'color'], 'line-width': 2.5, 'line-opacity': 0.92 },
-      }, labelLayer?.id)
-      map.addLayer({ id: 'cta-routes-core', type: 'line', source: 'cta-routes',
+      })
+      map.addLayer({ id: 'cta-routes-core', type: 'line', slot: 'middle', source: 'cta-routes',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': '#ffffff', 'line-width': 0.75, 'line-opacity': 0.22 },
-      }, labelLayer?.id)
+      })
 
       // Train sources + layers
       map.addSource('cta-trains', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
-      map.addLayer({ id: 'cta-train-ring', type: 'circle', source: 'cta-trains',
+      map.addLayer({ id: 'cta-train-ring', type: 'circle', slot: 'top', source: 'cta-trains',
         paint: {
           'circle-radius': 11, 'circle-color': ['get', 'color'],
           'circle-opacity': 0.12, 'circle-stroke-width': 0,
         }
       })
-      map.addLayer({ id: 'cta-train-dots', type: 'circle', source: 'cta-trains',
+      map.addLayer({ id: 'cta-train-dots', type: 'circle', slot: 'top', source: 'cta-trains',
         paint: {
           'circle-radius': 4, 'circle-color': ['get', 'color'],
           'circle-stroke-color': '#ffffff', 'circle-stroke-width': 1.5,
@@ -425,7 +432,7 @@ export default function HomePage() {
       // Food places layer
       map.addSource('home-food', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       map.addLayer({
-        id: 'home-food-icons', type: 'symbol', source: 'home-food',
+        id: 'home-food-icons', type: 'symbol', slot: 'top', source: 'home-food',
         layout: {
           'icon-image': ['get', 'icon'], 'icon-size': 0.85,
           'icon-allow-overlap': true, 'icon-ignore-placement': true, 'icon-anchor': 'center',
@@ -448,7 +455,7 @@ export default function HomePage() {
       // Nightlife places layer
       map.addSource('home-nightlife', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       map.addLayer({
-        id: 'home-nl-icons', type: 'symbol', source: 'home-nightlife',
+        id: 'home-nl-icons', type: 'symbol', slot: 'top', source: 'home-nightlife',
         layout: {
           'icon-image': ['get', 'icon'], 'icon-size': 0.85,
           'icon-allow-overlap': true, 'icon-ignore-placement': true, 'icon-anchor': 'center',
@@ -472,7 +479,7 @@ export default function HomePage() {
       await Promise.allSettled(STADIUMS.map(s => loadStadiumLogo(map, s)))
       map.addSource('stadiums', { type: 'geojson', data: stadiumGeoJSON() })
       map.addLayer({
-        id: 'stadium-icons', type: 'symbol', source: 'stadiums',
+        id: 'stadium-icons', type: 'symbol', slot: 'top', source: 'stadiums',
         layout: {
           'icon-image': ['get', 'icon'],
           // Bulls + Bears scale up when zoomed out so they dominate their shared venues
@@ -610,7 +617,7 @@ export default function HomePage() {
   }, [boundaries]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="home-page">
+    <div className="home-page" data-light={preset}>
       {MAPBOX_TOKEN
         ? <div ref={containerRef} className="home-map" />
         : <div className="home-map"><MapPlaceholder /></div>}
@@ -647,6 +654,17 @@ export default function HomePage() {
       <div className="home-mode-pills">
         <button className={`hud-pill${orbit ? '' : ' active'}`} onClick={() => setOrbit(false)}>Free</button>
         <button className={`hud-pill${orbit ? ' active' : ''}`} onClick={() => setOrbit(true)}>Orbit</button>
+      </div>
+      <div className="home-light-pills">
+        {LIGHT_PRESETS.map(p => (
+          <button
+            key={p}
+            className={`hud-pill${preset === p ? ' active' : ''}`}
+            onClick={() => setPreset(p)}
+          >
+            {p}
+          </button>
+        ))}
       </div>
       <div className="home-hints">
         <span><span className="hud-kbd">Drag</span> rotate</span>
