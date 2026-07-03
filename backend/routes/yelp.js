@@ -77,7 +77,7 @@ async function overpassFetch(query) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'ChicagoExplorer/1.0 (chicago-explorer app; contact via github)',
+          'User-Agent': 'ChiAtlas/1.0 (chi atlas app; contact via github)',
         },
         body: `data=${encodeURIComponent(query)}`,
         signal: AbortSignal.timeout(14000),

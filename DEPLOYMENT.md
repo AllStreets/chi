@@ -20,7 +20,7 @@ All API keys are already in `backend/.env` and `frontend/.env` in the repo. Do n
 ### Create the service
 
 1. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub repo**
-2. Select the `chicago-explore` repository
+2. Select the `chi` repository
 3. Set **Root Directory** to `backend`
 4. Railway detects `Procfile` (`web: node server.js`) and configures the start command automatically
 
@@ -48,7 +48,7 @@ Leave `FRONTEND_URL` as a placeholder for now — update it after the frontend i
 
 After the first deploy: **Settings** → **Domains** → copy the generated URL.
 
-It will look like `https://chicago-explore-production.up.railway.app` — you need this for the frontend.
+It will look like `https://chi-production.up.railway.app` — you need this for the frontend.
 
 ---
 
@@ -57,7 +57,7 @@ It will look like `https://chicago-explore-production.up.railway.app` — you ne
 ### Create the project
 
 1. Go to [vercel.com](https://vercel.com) → **Add New** → **Project**
-2. Import the `chicago-explore` GitHub repository
+2. Import the `chi` GitHub repository
 3. Set **Root Directory** to `frontend`
 4. Vercel detects Vite automatically. Build settings should be:
    - **Build Command:** `npm run build`
@@ -96,7 +96,7 @@ Replace `VITE_API_URL` with the Railway URL from step 1.
 
 Once both deploys succeed:
 
-1. Copy your Vercel URL (e.g. `https://chicago-explorer.vercel.app`)
+1. Copy your Vercel URL (e.g. `https://chi.vercel.app`)
 2. Go to Railway → **Variables** → update `FRONTEND_URL` to the real Vercel URL
 3. Railway redeploys automatically — this unlocks CORS so the frontend can call the backend
 

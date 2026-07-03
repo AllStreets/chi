@@ -66,8 +66,8 @@ Repo: https://github.com/AllStreets/chi
 ### 1. Clone
 
 ```bash
-git clone https://github.com/AllStreets/chicago-explore.git
-cd chicago-explore
+git clone https://github.com/AllStreets/chi.git
+cd chi
 ```
 
 ### 2. Backend
@@ -133,7 +133,7 @@ cd frontend && npx vitest run
 ## Project Structure
 
 ```
-chicago-explorer/
+chi/
 ├── backend/
 │   ├── routes/
 │   │   ├── ai.js               # OpenAI streaming — Explore + Neighborhoods AI

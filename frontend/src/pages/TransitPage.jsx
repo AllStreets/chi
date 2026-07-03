@@ -197,9 +197,9 @@ export default function TransitPage() {
         glowPhase += 0.006; ringPhase += 0.03
 
         if (map.getLayer('cta-routes-glow')) {
-          const op = 0.10 + Math.sin(glowPhase) * 0.16
+          const op = Math.max(0, 0.10 + Math.sin(glowPhase) * 0.16)
           map.setPaintProperty('cta-routes-glow', 'line-opacity', op)
-          map.setPaintProperty('cta-routes-atmo', 'line-opacity', 0.04 + Math.sin(glowPhase) * 0.06)
+          map.setPaintProperty('cta-routes-atmo', 'line-opacity', Math.max(0, 0.04 + Math.sin(glowPhase) * 0.06))
         }
         if (map.getLayer('train-ring')) {
           map.setPaintProperty('train-ring', 'circle-radius', 6 + Math.sin(ringPhase) * 4)
