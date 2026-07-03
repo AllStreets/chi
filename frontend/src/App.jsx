@@ -2,6 +2,7 @@
 import { Component, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
+import CommandPalette from './components/hud/CommandPalette'
 import HomePage from './pages/HomePage'
 import TransitPage from './pages/TransitPage'
 import FoodPage from './pages/FoodPage'
@@ -37,10 +38,10 @@ class PageBoundary extends Component {
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 function applyAppearance() {
-  const accent = localStorage.getItem('chi_ui_accent') || '#00d4ff'
+  const accent = localStorage.getItem('chi_ui_accent') || '#45d8ff'
   const density = localStorage.getItem('chi_ui_density') || 'normal'
-  const r = parseInt(accent.slice(1, 3), 16) || 0
-  const g = parseInt(accent.slice(3, 5), 16) || 212
+  const r = parseInt(accent.slice(1, 3), 16) || 69
+  const g = parseInt(accent.slice(3, 5), 16) || 216
   const b = parseInt(accent.slice(5, 7), 16) || 255
   document.documentElement.style.setProperty('--accent', accent)
   document.documentElement.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`)
@@ -77,6 +78,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Sidebar />
+      <CommandPalette />
       <main className="main-content">
         <PageBoundary>
           <Routes>

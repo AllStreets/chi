@@ -7,6 +7,7 @@ import {
   RiCommunityLine, RiUser3Line, RiMenuLine, RiAlertLine,
   RiHeartPulseLine, RiNewspaperLine, RiLineChartLine, RiSettings3Line,
 } from 'react-icons/ri'
+import HudClock from './hud/HudClock'
 import './Sidebar.css'
 
 const NAV = [
@@ -19,7 +20,7 @@ const NAV = [
   { to: '/nightlife',     icon: RiMoonLine,            label: 'Nightlife' },
   { to: '/events',        icon: RiCalendarEventLine,   label: 'Events' },
   { to: '/health',        icon: RiHeartPulseLine,      label: 'Health' },
-  { to: '/news',           icon: RiNewspaperLine,       label: 'News' },
+  { to: '/news',          icon: RiNewspaperLine,       label: 'News' },
   { to: '/weather',       icon: RiCloudLine,           label: 'Weather & Lake' },
   { to: '/finance',       icon: RiLineChartLine,       label: 'Finance' },
   { to: '/neighborhoods', icon: RiCommunityLine,       label: 'Neighborhoods' },
@@ -35,7 +36,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     document.documentElement.style.setProperty(
-      '--sidebar-w', collapsed ? '48px' : '200px'
+      '--sidebar-w', collapsed ? '52px' : '208px'
     )
   }, [collapsed])
 
@@ -63,7 +64,12 @@ export default function Sidebar() {
   return (
     <nav className={`sidebar${collapsed ? ' collapsed' : ''}`}>
       <div className="sidebar-header">
-        {!collapsed && <span className="sidebar-logo-text">CHICAGO</span>}
+        {!collapsed && (
+          <div className="sidebar-brand">
+            <span className="sidebar-logo-text">CHI&nbsp;ATLAS</span>
+            <span className="sidebar-tagline">City Intelligence</span>
+          </div>
+        )}
         <button
           className="sidebar-hamburger"
           onClick={() => setCollapsed(c => !c)}
@@ -99,6 +105,12 @@ export default function Sidebar() {
           <RiSettings3Line className="sidebar-icon" />
           <span className="sidebar-label">Settings</span>
         </NavLink>
+        {!collapsed && (
+          <div className="sidebar-clock-row">
+            <HudClock />
+            <span className="hud-kbd" title="Command palette">⌘K</span>
+          </div>
+        )}
       </div>
     </nav>
   )
