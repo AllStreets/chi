@@ -177,9 +177,12 @@
 
 .fin-panel-label svg { color: var(--accent); }
 
-/* Small mono badge marking static/reference sections as non-live */
-.fin-static-chip {
+/* Per-tile honesty chip: LIVE / DAILY / MONTHLY / INDICATIVE */
+.fin-cadence-chip {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-family: var(--font-mono, monospace);
   font-size: 8.5px;
   font-weight: 600;
@@ -189,7 +192,53 @@
   border-radius: 3px;
   padding: 1px 5px;
   line-height: 1.4;
-  opacity: 0.85;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.fin-cadence-chip.live {
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.4);
+  background: rgba(var(--accent-rgb), 0.06);
+}
+
+.fin-cadence-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9);
+  animation: hud-pulse 2s ease-in-out infinite;
+}
+
+.fin-cadence-chip.daily,
+.fin-cadence-chip.weekly,
+.fin-cadence-chip.monthly {
+  color: var(--text-muted);
+}
+
+.fin-cadence-chip.indicative { opacity: 0.75; }
+
+/* Secondary note inside a panel label (e.g. "ETF PROXIES") */
+.fin-label-note {
+  font-family: var(--font-mono, monospace);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  opacity: 0.7;
+  margin-left: 2px;
+}
+
+/* Mono footnote pinned at the bottom of a tile — source attribution */
+.fin-tile-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+  opacity: 0.7;
 }
 
 /* UPDATED chip when the market is closed */
@@ -447,12 +496,406 @@
   vertical-align: middle;
 }
 
-/* ── Bottom row ──────────────────────────────────────────────────── */
+/* ── Row grids ───────────────────────────────────────────────────── */
 
-.fin-bottom-row {
+/* Sector heatmap | 52-week range */
+.fin-mid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+}
+
+/* Crypto | FX | Yield curve | Fear & Greed */
+.fin-macro-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+/* City pulse | Rent barometer | Economic pulse */
+.fin-local-row {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1.1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+/* ── US markets strip (index ETF proxies) ────────────────────────── */
+
+.fin-usmkt-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fin-usmkt-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: rgba(148, 187, 255, 0.03);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.fin-usmkt-card:hover {
+  border-color: var(--border-strong);
+  background: rgba(var(--accent-rgb), 0.05);
+}
+
+.fin-usmkt-top {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.fin-usmkt-sym {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+}
+
+.fin-usmkt-name {
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+  color: var(--text-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fin-usmkt-price {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.22);
+}
+
+.fin-usmkt-chg {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 4px;
+}
+
+.fin-usmkt-chg.pos { color: #22c55e; }
+.fin-usmkt-chg.neg { color: #ef4444; }
+
+/* ── Crypto tile ─────────────────────────────────────────────────── */
+
+.fin-crypto-rows {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.fin-crypto-row {
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  grid-template-areas: 'sym name price' 'sym name chg';
+  align-items: center;
+  column-gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.fin-crypto-row:last-child { border-bottom: none; }
+
+.fin-crypto-sym {
+  grid-area: sym;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: 4px;
+  padding: 3px 0;
+  text-align: center;
+  background: rgba(var(--accent-rgb), 0.05);
+}
+
+.fin-crypto-name {
+  grid-area: name;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fin-crypto-price {
+  grid-area: price;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-crypto-chg {
+  grid-area: chg;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: flex-end;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-crypto-chg.pos { color: #22c55e; }
+.fin-crypto-chg.neg { color: #ef4444; }
+
+/* ── FX tile ─────────────────────────────────────────────────────── */
+
+.fin-fx-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+
+.fin-fx-row {
+  display: grid;
+  grid-template-columns: 74px 1fr 60px;
+  align-items: center;
+  gap: 8px;
+}
+
+.fin-fx-pair {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.fin-fx-arrow { color: var(--accent); margin: 0 3px; font-weight: 400; }
+
+.fin-fx-bar-wrap {
+  height: 4px;
+  background: rgba(148, 187, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.fin-fx-bar {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.45), var(--accent));
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.35);
+  transition: width 0.5s ease;
+}
+
+.fin-fx-rate {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Treasury yield curve tile ───────────────────────────────────── */
+
+.fin-yield-svg {
+  width: 100%;
+  height: 74px;
+  display: block;
+  margin-top: 2px;
+}
+
+.fin-yield-val {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  fill: var(--text-muted);
+}
+
+.fin-yield-tenors {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+
+.fin-yield-spread {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-yield-spread.pos { color: #22c55e; }
+.fin-yield-spread.neg { color: #ef4444; }
+
+.fin-yield-inverted {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  border-radius: 3px;
+  padding: 1px 5px;
+  background: rgba(239, 68, 68, 0.08);
+  animation: hud-pulse 2s ease-in-out infinite;
+}
+
+/* ── Crypto Fear & Greed gauge ───────────────────────────────────── */
+
+.fin-fng-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  position: relative;
+}
+
+.fin-fng-svg {
+  width: 150px;
+  height: 80px;
+  display: block;
+}
+
+.fin-fng-value {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-top: -32px;
+  text-shadow: 0 0 16px currentColor;
+}
+
+.fin-fng-class {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+
+/* ── City pulse ──────────────────────────────────────────────────── */
+
+.fin-city-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  justify-content: center;
+}
+
+.fin-city-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: rgba(148, 187, 255, 0.03);
+}
+
+.fin-city-stat-hdr {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+}
+
+.fin-city-stat-hdr svg { color: var(--accent); }
+
+.fin-city-stat-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fin-city-count {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.25);
+}
+
+.fin-city-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-city-delta.up   { color: #22c55e; }
+.fin-city-delta.down { color: #ef4444; }
+.fin-city-delta.flat { color: var(--text-faint); }
+
+.fin-city-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fin-city-bar-row {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+}
+
+.fin-city-bar-wrap {
+  height: 4px;
+  background: rgba(148, 187, 255, 0.07);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.fin-city-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: rgba(148, 187, 255, 0.3);
+  transition: width 0.5s ease;
+}
+
+.fin-city-bar.now {
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.45), var(--accent));
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.4);
 }
 
 /* ── Top movers ──────────────────────────────────────────────────── */
@@ -700,11 +1143,21 @@
   .fin-grid { grid-template-columns: 1fr; }
   .fin-right-col { flex-direction: column; }
   .fin-rent-row { grid-template-columns: 100px 1fr 48px 44px; }
-  .fin-bottom-row { grid-template-columns: 1fr; }
+  .fin-mid-row,
+  .fin-local-row { grid-template-columns: 1fr; }
+  .fin-macro-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fin-usmkt-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (min-width: 901px) and (max-width: 1300px) {
-  .fin-bottom-row { grid-template-columns: 1fr 1fr; }
+  .fin-macro-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fin-local-row { grid-template-columns: 1fr 1fr; }
+  .fin-local-row .fin-panel--indicators { grid-column: span 2; }
+}
+
+@media (max-width: 600px) {
+  .fin-macro-row,
+  .fin-usmkt-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
