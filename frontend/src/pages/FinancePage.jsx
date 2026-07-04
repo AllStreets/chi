@@ -7,6 +7,9 @@ import {
 import './FinancePage.css'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+// Matches the backend's market-hours cache TTL (60s) — polling faster than
+// the cache refreshes would only re-fetch identical data.
+const POLL_MS = 60_000
 
 function useFinance() {
   const [stocks, setStocks]         = useState([])
@@ -14,26 +17,38 @@ function useFinance() {
   const [indicators, setIndicators] = useState([])
   const [loading, setLoading]       = useState(true)
   const [lastUpdated, setLastUpdated] = useState(null)
+  const [source, setSource]         = useState(null)
+  const [marketOpen, setMarketOpen] = useState(null)
 
-  async function load() {
-    setLoading(true)
+  async function load(showSync = true) {
+    if (showSync) setLoading(true)
     try {
       const [s, r, i] = await Promise.all([
         fetch(`${API}/api/finance/stocks`).then(x => x.json()),
         fetch(`${API}/api/finance/rents`).then(x => x.json()),
         fetch(`${API}/api/finance/indicators`).then(x => x.json()),
       ])
-      setStocks(Array.isArray(s) ? s : [])
+      // Backend returns { quotes, fetchedAt, source, marketOpen };
+      // tolerate the legacy bare-array shape too.
+      const quotes = Array.isArray(s) ? s : (Array.isArray(s?.quotes) ? s.quotes : [])
+      setStocks(quotes)
       setRents(Array.isArray(r) ? r : [])
       setIndicators(Array.isArray(i) ? i : [])
-      setLastUpdated(new Date())
+      // UPDATED chip shows the data's real age (backend fetchedAt), not render time.
+      setLastUpdated(s?.fetchedAt ? new Date(s.fetchedAt) : new Date())
+      setSource(s?.source ?? null)
+      setMarketOpen(typeof s?.marketOpen === 'boolean' ? s.marketOpen : null)
     } catch {}
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load(true)
+    const timer = setInterval(() => load(false), POLL_MS)
+    return () => clearInterval(timer)
+  }, [])
 
-  return { stocks, rents, indicators, loading, lastUpdated, refresh: load }
+  return { stocks, rents, indicators, loading, lastUpdated, source, marketOpen, refresh: () => load(true) }
 }
 
 function Sparkline({ data, positive }) {
@@ -256,11 +271,15 @@ function TickerStrip({ stocks }) {
 }
 
 export default function FinancePage() {
-  const { stocks, rents, indicators, loading, lastUpdated, refresh } = useFinance()
+  const { stocks, rents, indicators, loading, lastUpdated, source, marketOpen, refresh } = useFinance()
 
   const fmtTime = t => t
     ? t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
     : '--'
+
+  const statusText = loading
+    ? 'SYNCING'
+    : source === 'finnhub' ? 'MARKET DATA' : 'INDICATIVE DATA'
 
   return (
     <div className="fin-page">
@@ -271,8 +290,13 @@ export default function FinancePage() {
             <h1 className="hud-title fin-title">Chicago Finance</h1>
           </div>
           <div className="fin-header-right">
-            <span className="hud-chip live"><span className="dot" />{loading ? 'SYNCING' : 'MARKET DATA'}</span>
-            {lastUpdated && <span className="hud-chip fin-last-updated">UPDATED {fmtTime(lastUpdated)}</span>}
+            <span className="hud-chip live"><span className="dot" />{statusText}</span>
+            {lastUpdated && (
+              <span className={`hud-chip fin-last-updated${marketOpen === false ? ' fin-market-closed' : ''}`}>
+                {marketOpen === false && <>MARKET CLOSED<span className="fin-chip-sep">·</span></>}
+                UPDATED {fmtTime(lastUpdated)}
+              </span>
+            )}
             <button className={`fin-refresh${loading ? ' spinning' : ''}`} onClick={refresh} title="Refresh">
               <RiRefreshLine size={13} />
             </button>
@@ -320,7 +344,10 @@ export default function FinancePage() {
 
         <div className="fin-right-col">
           <div className="fin-panel fin-panel--rents hud-panel hud-rise">
-            <div className="fin-panel-label"><RiBuilding2Line size={11} /> CHICAGO RENT BAROMETER</div>
+            <div className="fin-panel-label">
+              <RiBuilding2Line size={11} /> CHICAGO RENT BAROMETER
+              <span className="fin-static-chip" title="Static reference data — not a live feed">INDICATIVE</span>
+            </div>
             <div className="fin-rent-grid">
               {rents.map(r => (
                 <div key={r.neighborhood} className="fin-rent-row">
@@ -339,7 +366,10 @@ export default function FinancePage() {
           </div>
 
           <div className="fin-panel fin-panel--indicators hud-panel hud-rise">
-            <div className="fin-panel-label"><RiLineChartLine size={11} /> ECONOMIC PULSE</div>
+            <div className="fin-panel-label">
+              <RiLineChartLine size={11} /> ECONOMIC PULSE
+              <span className="fin-static-chip" title="Static reference data — not a live feed">INDICATIVE</span>
+            </div>
             <div className="fin-indicators">
               {indicators.map((ind, i) => (
                 <div key={i} className="fin-ind-row">

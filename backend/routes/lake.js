@@ -1,13 +1,38 @@
 // backend/routes/lake.js
 const { Router } = require('express')
 const router = Router()
+const { fetchWeather } = require('../lib/weather')
 
-const LAT = 41.8919
-const LON = -87.6197
-const OWM_BASE = 'https://api.openweathermap.org/data/2.5'
+// NOAA CO-OPS water temperature — real Lake Michigan readings, free, no key.
+// Stations tried in order: Calumet Harbor (Chicago side), Milwaukee, Holland MI.
+// Calumet Harbor and Milwaukee no longer publish water_temperature, so Holland
+// (across the lake) is the usual responder. Verified 2026-07.
+const NOAA_STATIONS = ['9087044', '9087072', '9087031']
+const NOAA_TTL = 30 * 60 * 1000
+let _water = null    // { tempC: number, station: string }
+let _waterAt = 0
 
-function owmUrl() {
-  return `${OWM_BASE}/weather?lat=${LAT}&lon=${LON}&units=metric&appid=${process.env.OPENWEATHER_API_KEY}`
+function noaaUrl(station) {
+  return `https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=${station}&product=water_temperature&units=metric&time_zone=lst_ldt&format=json`
+}
+
+// Returns { tempC, station } or null. Successes are cached 30 min; failures
+// are not cached so the next request retries.
+async function fetchWaterTemp() {
+  if (_water && Date.now() - _waterAt < NOAA_TTL) return _water
+  for (const station of NOAA_STATIONS) {
+    try {
+      const r = await fetch(noaaUrl(station), { signal: AbortSignal.timeout(6000) })
+      const j = await r.json()
+      const v = parseFloat(j?.data?.[0]?.v)
+      if (Number.isFinite(v)) {
+        _water = { tempC: v, station }
+        _waterAt = Date.now()
+        return _water
+      }
+    } catch { /* station unavailable — try the next one */ }
+  }
+  return null
 }
 
 function calcNiceScore({ tempC, windMps, description }) {
@@ -42,17 +67,28 @@ function calcNiceScore({ tempC, windMps, description }) {
 }
 
 // GET /api/lake — lake conditions + niceness score
+// Air conditions come from the shared lib/weather cache (same source as
+// /api/weather and /api/beach); water temperature comes from NOAA CO-OPS.
 router.get('/', async (_req, res) => {
   try {
-    const r = await fetch(owmUrl())
-    const d = await r.json()
-    const tempC = d.main.temp
-    const windMps = d.wind.speed
-    const description = d.weather[0].description
-    const niceScore = calcNiceScore({ tempC, windMps, description })
+    const [w, water] = await Promise.all([fetchWeather(), fetchWaterTemp()])
+    if (!w) return res.status(503).json({ error: 'No weather API key configured' })
+
+    const airTempC    = w.temp
+    const windMps     = w.wind?.speed ?? 0
+    const description = w.description || ''
+    const waterTempC  = water ? Math.round(water.tempC * 10) / 10 : null
+
+    // Score against real water temp when NOAA answers; fall back to air temp.
+    const niceScore = calcNiceScore({ tempC: waterTempC ?? airTempC, windMps, description })
+
     res.json({
-      tempC:     Math.round(tempC),
-      windMps:   Math.round(windMps * 10) / 10,
+      tempC:        airTempC,   // legacy field — AIR temperature (kept for backward compat)
+      airTempC,                 // explicit alias so nobody mistakes it for water again
+      waterTempC,               // real Lake Michigan water temp (°C) or null if NOAA is down
+      waterTempF:   waterTempC != null ? Math.round(waterTempC * 9 / 5 + 32) : null,
+      waterStation: water?.station ?? null,
+      windMps:      Math.round(windMps * 10) / 10,
       description,
       niceScore,
       niceLabel: niceScore >= 75 ? 'Great day' : niceScore >= 40 ? 'Decent' : 'Stay inside',

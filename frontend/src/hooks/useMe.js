@@ -37,7 +37,7 @@ export async function addVisited(place) {
     await fetch(`${API}/api/me/visited`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
-      body: JSON.stringify({ place_id: place.id, place_name: place.name })
+      body: JSON.stringify({ place_id: place.id, place_name: place.name, lat: place.lat, lon: place.lon })
     })
   } catch { /* silently fail */ }
 }

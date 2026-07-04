@@ -163,7 +163,15 @@ function LakeScene({ lake, weather }) {
   const showLightning = state === 'stormy'
 
   const lakeWindMph = lake.windMps != null ? Math.round(lake.windMps * 2.237 * 10) / 10 : '--'
-  const overlayDesc = `${stateLabels[state]} — niceScore ${lake.niceScore ?? '--'} · ${lake.tempC ?? '--'}°C water · ${lakeWindMph} mph wind`
+  // One clean conditions line. Water temp is real NOAA data (waterTempF) —
+  // omitted entirely when NOAA has no reading, never substituted with air temp.
+  const condition = description || stateLabels[state]
+  const waterPart = lake.waterTempF != null ? ` · ${lake.waterTempF}°F water` : ''
+  const overlayDesc = `${condition}${waterPart} · ${lakeWindMph} mph wind`
+  // Reconcile sky vs. lake: grey skies but a high niceScore is not a contradiction.
+  const desc = description.toLowerCase()
+  const greySky = desc.includes('overcast') || desc.includes('cloud') || state === 'overcast'
+  const showReconcile = greySky && (lake.niceScore ?? 0) >= 70
 
   return (
     <div className={`lake-scene lake-scene--${state}`}>
@@ -192,12 +200,10 @@ function LakeScene({ lake, weather }) {
 
       <div className="lake-overlay">
         <div className="lake-state-label">{stateLabels[state]}</div>
+        {showReconcile && (
+          <div className="lake-state-note">overcast skies · still a great lake day</div>
+        )}
         <div className="lake-state-desc">{overlayDesc}</div>
-        <div className="lake-metrics">
-          <span>niceScore {lake.niceScore ?? '--'}</span>
-          <span>{lake.tempC ?? '--'}°C water</span>
-          <span>{lakeWindMph} mph wind</span>
-        </div>
         <div className="lake-badge">
           {lake.niceLabel || (state === 'beautiful' ? 'Excellent conditions' : 'Check before going out')}
         </div>

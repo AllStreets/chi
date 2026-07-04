@@ -544,13 +544,13 @@
   color: rgba(232, 238, 249, 0.72);
 }
 
-.lake-metrics {
-  display: flex;
-  gap: 12px;
-  font-size: 10px;
+.lake-state-note {
+  font-size: 9px;
   font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: rgba(232, 238, 249, 0.72);
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: rgba(var(--accent-rgb), 0.85);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .lake-badge {

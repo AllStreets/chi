@@ -177,6 +177,25 @@
 
 .fin-panel-label svg { color: var(--accent); }
 
+/* Small mono badge marking static/reference sections as non-live */
+.fin-static-chip {
+  margin-left: auto;
+  font-family: var(--font-mono, monospace);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+/* UPDATED chip when the market is closed */
+.fin-market-closed { color: #f59e0b; }
+.fin-chip-sep { margin: 0 5px; opacity: 0.5; }
+
 /* ── Stocks table ────────────────────────────────────────────────── */
 
 .fin-panel--stocks { overflow: hidden; }

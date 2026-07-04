@@ -66,22 +66,45 @@ const RENT_DATA = [
   { neighborhood: 'Pilsen',         avgRent: 1600, trend: 'up',   yoy: 5.8 },
 ]
 
-// GET /api/finance/stocks
-router.get('/stocks', async (req, res) => {
-  const CACHE_KEY = 'finance_stocks_v1'
-  const TTL_MS = 5 * 60 * 1000 // 5 minutes
+// ── /stocks: Finnhub free tier is 60 calls/min (we make 20 per refresh,
+//    one per symbol). A 60s TTL during market hours = max 20 calls/min,
+//    comfortably within the limit. Off-hours quotes don't change, so we
+//    stretch the TTL to stay polite. Without FINNHUB_API_KEY the route
+//    serves static indicative quotes (marked source: 'indicative').
+const CACHE_KEY = 'finance_stocks_v2'
+const TTL_OPEN_MS   = 60 * 1000        // market hours: near-live
+const TTL_CLOSED_MS = 10 * 60 * 1000   // market closed: data is static anyway
 
+// NYSE/Nasdaq regular session in Chicago time: Mon–Fri 08:30–15:00 CT.
+// (Ignores market holidays — worst case we poll a closed market politely.)
+function isMarketOpen(now = new Date()) {
   try {
-    const cached = stmtGet.get(CACHE_KEY)
-    if (cached && Date.now() - cached.cached_at < TTL_MS) {
-      return res.json(JSON.parse(cached.data))
-    }
-  } catch {}
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago',
+      weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
+    }).formatToParts(now)
+    const get = t => parts.find(p => p.type === t)?.value
+    const day = get('weekday')
+    if (day === 'Sat' || day === 'Sun') return false
+    const mins = (parseInt(get('hour'), 10) % 24) * 60 + parseInt(get('minute'), 10)
+    return mins >= 8 * 60 + 30 && mins < 15 * 60
+  } catch {
+    return false
+  }
+}
 
+function mockPayload() {
+  return {
+    quotes: CHICAGO_STOCKS.map(({ symbol, name, sector }) => ({
+      symbol, name, sector, ...MOCK_QUOTES[symbol],
+    })),
+    fetchedAt: Date.now(),
+    source: 'indicative',
+  }
+}
+
+async function buildPayload() {
   const apiKey = process.env.FINNHUB_API_KEY
-
-  let result
-
   if (apiKey) {
     try {
       const quotes = await Promise.all(
@@ -111,26 +134,65 @@ router.get('/stocks', async (req, res) => {
           }
         })
       )
-      result = quotes
+      // Finnhub returns c:0 for bad symbols / throttled keys — only trust
+      // the batch if we actually got prices back.
+      if (quotes.some(q => q.price)) {
+        return { quotes, fetchedAt: Date.now(), source: 'finnhub' }
+      }
     } catch {
-      // fall through to mock
+      // fall through to indicative
     }
   }
+  return mockPayload()
+}
 
-  if (!result) {
-    result = CHICAGO_STOCKS.map(({ symbol, name, sector }) => ({
-      symbol,
-      name,
-      sector,
-      ...MOCK_QUOTES[symbol],
-    }))
+// Single-flight guard so concurrent requests trigger at most one upstream sweep.
+let inflight = null
+function refreshStocks() {
+  if (!inflight) {
+    inflight = buildPayload()
+      .then(payload => {
+        try { stmtSet.run(CACHE_KEY, JSON.stringify(payload), Date.now()) } catch {}
+        return payload
+      })
+      .finally(() => { inflight = null })
+  }
+  return inflight
+}
+
+// GET /api/finance/stocks — stale-while-revalidate: cached data is returned
+// immediately; if it's past TTL a background refresh is kicked off so the
+// next poll gets fresh quotes. fetchedAt always reflects the data's real age.
+router.get('/stocks', async (req, res) => {
+  const marketOpen = isMarketOpen()
+  const ttl = marketOpen ? TTL_OPEN_MS : TTL_CLOSED_MS
+
+  let cachedPayload = null
+  let cachedAt = 0
+  try {
+    const cached = stmtGet.get(CACHE_KEY)
+    if (cached) {
+      const parsed = JSON.parse(cached.data)
+      if (parsed && Array.isArray(parsed.quotes)) {
+        cachedPayload = parsed
+        cachedAt = cached.cached_at
+      }
+    }
+  } catch {}
+
+  if (cachedPayload) {
+    if (Date.now() - cachedAt >= ttl) {
+      refreshStocks().catch(() => {}) // revalidate in the background
+    }
+    return res.json({ ...cachedPayload, marketOpen })
   }
 
   try {
-    stmtSet.run(CACHE_KEY, JSON.stringify(result), Date.now())
-  } catch {}
-
-  res.json(result)
+    const payload = await refreshStocks()
+    return res.json({ ...payload, marketOpen })
+  } catch {
+    return res.json({ ...mockPayload(), marketOpen })
+  }
 })
 
 // GET /api/finance/rents

@@ -189,7 +189,7 @@ export default function FoodPage() {
                       removeVisited(p.id)
                       setSaved(s => ({ ...s, [p.id]: null }))
                     } else {
-                      addVisited({ id: p.id, name: p.name })
+                      addVisited({ id: p.id, name: p.name, lat: p.lat, lon: p.lon })
                       setSaved(s => ({ ...s, [p.id]: 'visited' }))
                     }
                   }}

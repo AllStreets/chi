@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { RiHeartFill, RiCheckboxCircleLine, RiDeleteBinLine, RiPencilLine, RiFileTextLine, RiRouteLine } from 'react-icons/ri'
 import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
+import { LANDMARKS } from '../data/landmarks'
 import './MyChicagoPage.css'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -50,6 +51,23 @@ function useMe() {
   }
 
   return { me, loading, deleteFavorite, deleteVisited, saveNote }
+}
+
+// ── Coordinate enrichment ──────────────────────────────────────────
+// Favorites saved from Explore before coords were persisted (and day-plan
+// stops, which only store id + name) are backfilled here by case-insensitive
+// name match against the curated landmarks — no stored data needs touching.
+const LANDMARK_BY_NAME = new Map(LANDMARKS.map(l => [l.name.trim().toLowerCase(), l]))
+
+function hasCoords(p) {
+  return p.lat != null && p.lon != null &&
+    Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lon))
+}
+
+function enrichWithLandmark(place) {
+  if (hasCoords(place)) return place
+  const lm = LANDMARK_BY_NAME.get((place.place_name || '').trim().toLowerCase())
+  return lm ? { ...place, lat: lm.lat, lon: lm.lon } : place
 }
 
 // ── Itinerary mini-map ─────────────────────────────────────────────
@@ -163,14 +181,28 @@ export default function MyChicagoPage() {
     catch { return [] }
   })
 
-  // Favorites that carry coordinates (lat/lon are nullable in /api/me data)
+  // Favorites that carry coordinates (lat/lon are nullable in /api/me data);
+  // rows without coords are backfilled by name from the curated landmarks.
   const mappable = useMemo(
-    () => (me.favorites || []).filter(f =>
-      f.lat != null && f.lon != null &&
-      Number.isFinite(Number(f.lat)) && Number.isFinite(Number(f.lon))
-    ),
+    () => (me.favorites || []).map(enrichWithLandmark).filter(hasCoords),
     [me.favorites]
   )
+
+  // Day-plan stops in plan order — coords come from the matching favorite
+  // (food/nightlife saves) or the landmark name backfill (explore saves).
+  const mappablePlan = useMemo(() => {
+    const favs = me.favorites || []
+    return plan
+      .map(stop => {
+        const fav = favs.find(f => f.place_id === stop.id)
+        return enrichWithLandmark({ place_id: stop.id, place_name: stop.name, lat: fav?.lat, lon: fav?.lon })
+      })
+      .filter(hasCoords)
+  }, [plan, me.favorites])
+
+  // The mini-map plots plan stops (in plan order) on the Day Plan tab,
+  // favorites order otherwise.
+  const routePlaces = tab === 'plan' && plan.length > 0 ? mappablePlan : mappable
 
   function savePlan(newPlan) {
     setPlan(newPlan)
@@ -343,15 +375,23 @@ export default function MyChicagoPage() {
               <div className="mc-empty mc-route-empty">save places from Food, Nightlife or Explore to build your route</div>
               <div className="mc-route-hint">map offline</div>
             </>
-          ) : mappable.length === 0 ? (
+          ) : routePlaces.length === 0 ? (
             <div className="mc-empty mc-route-empty">save places from Food, Nightlife or Explore to build your route</div>
           ) : (
             <>
-              <RouteMiniMap places={mappable} />
-              {mappable.length < (me.favorites?.length ?? 0) && (
-                <div className="mc-route-hint">
-                  {mappable.length} of {me.favorites.length} saved places have map locations
-                </div>
+              <RouteMiniMap places={routePlaces} />
+              {tab === 'plan' && plan.length > 0 ? (
+                mappablePlan.length < plan.length && (
+                  <div className="mc-route-hint">
+                    {mappablePlan.length} of {plan.length} plan stops have map locations
+                  </div>
+                )
+              ) : (
+                mappable.length < (me.favorites?.length ?? 0) && (
+                  <div className="mc-route-hint">
+                    {mappable.length} of {me.favorites.length} saved places have map locations
+                  </div>
+                )
               )}
             </>
           )}

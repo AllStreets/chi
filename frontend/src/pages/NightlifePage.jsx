@@ -253,7 +253,7 @@ export default function NightlifePage() {
                         removeVisited(p.id)
                         setSaved(sv => ({ ...sv, [p.id]: null }))
                       } else {
-                        addVisited({ id: p.id, name: p.name })
+                        addVisited({ id: p.id, name: p.name, lat: p.lat, lon: p.lon })
                         setSaved(sv => ({ ...sv, [p.id]: 'visited' }))
                       }
                     }}
