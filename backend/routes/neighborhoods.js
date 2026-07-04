@@ -5,7 +5,7 @@ const db = require('../db')
 const HOOD_COLORS = {
   'streeterville': '#1e40af',
   'wicker-park':   '#8b5cf6',
-  'lincoln-park':  '#eab308',
+  'lincoln-park':  '#14b8a6',   // teal — gold now belongs to Gold Coast
   'logan-square':  '#f43f5e',
   'river-north':   '#f97316',
   'south-loop':    '#06b6d4',
@@ -15,6 +15,8 @@ const HOOD_COLORS = {
   'hyde-park':     '#6366f1',
   'old-town':      '#ec4899',
   'west-loop':     '#00d4ff',
+  'gold-coast':    '#ffd700',
+  'fulton-market': '#d946ef',
 }
 
 const NEIGHBORHOODS = [
@@ -161,6 +163,30 @@ const NEIGHBORHOODS = [
     commute: '15 min on Green/Pink Line',
     topSpots: ['Randolph St restaurants', 'Fulton Market', 'Google HQ Chicago'],
     description: 'The hottest neighborhood in Chicago right now. Fulton Market has transformed from meatpacking district to restaurant row. Home to Google\'s Chicago HQ, upscale condos, and some of the city\'s best dining.'
+  },
+  {
+    id: 'gold-coast',
+    name: 'Gold Coast',
+    tagline: 'Historic mansions, lakefront glamour',
+    vibe: ['historic', 'upscale', 'lakefront'],
+    walkScore: 96,
+    transitScore: 81,
+    avgRent: 3100,
+    commute: '10 min to the Loop on Red Line',
+    topSpots: ['Oak Street Beach', 'Astor Street District', 'The Drake Hotel'],
+    description: 'Mansion-lined streets between the lake and Clark Street, anchored by the landmark Astor Street District. Oak Street\'s designer shopping, Rush Street dining, and Oak Street Beach make it Chicago\'s most polished lakefront address.'
+  },
+  {
+    id: 'fulton-market',
+    name: 'Fulton Market',
+    tagline: 'Meatpacking grit turned restaurant row',
+    vibe: ['foodie', 'industrial-chic', 'buzzing'],
+    walkScore: 94,
+    transitScore: 85,
+    avgRent: 2850,
+    commute: 'Morgan stop on Green/Pink Line',
+    topSpots: ['Time Out Market', 'Green Street Smoked Meats', 'The Publishing House'],
+    description: 'The old meatpacking district reborn as Chicago\'s hottest dining and tech corridor. James Beard-winning restaurants share cobblestone blocks with Google and McDonald\'s headquarters, galleries, and late-night cocktail bars under the old butcher signs.'
   }
 ]
 
@@ -220,11 +246,21 @@ const HOOD_POLYGONS = {
     [-87.611, 41.780], [-87.588, 41.780], [-87.588, 41.804], [-87.596, 41.805],
     [-87.611, 41.804], [-87.611, 41.780],
   ],
+  'gold-coast': [
+    [-87.632, 41.900], [-87.624, 41.900], [-87.625, 41.911],
+    [-87.632, 41.911], [-87.632, 41.900],
+  ],
+  // Fulton Market District per city plan: Halsted→Ogden, Randolph→Hubbard.
+  // Not in the official neighborhoods dataset, so this IS its polygon.
+  'fulton-market': [
+    [-87.648, 41.8843], [-87.666, 41.8843], [-87.666, 41.8895],
+    [-87.648, 41.8895], [-87.648, 41.8843],
+  ],
 }
 
 // Official street-accurate boundaries — City of Chicago "Boundaries - Neighborhoods"
 const BOUNDARIES_URL   = 'https://data.cityofchicago.org/resource/y6yq-dbs2.json?$limit=100'
-const BOUNDS_CACHE_KEY = 'hood_boundaries_v1'
+const BOUNDS_CACHE_KEY = 'hood_boundaries_v2'
 const BOUNDS_TTL_MS    = 30 * 24 * 60 * 60 * 1000 // 30 days
 const MAX_COORDS       = 3000 // per-neighborhood coordinate budget before decimation
 

@@ -31,12 +31,12 @@ const DATASET = [
 beforeEach(() => {
   fetch.mockClear()
   fetch.mockResolvedValue({ ok: true, json: async () => DATASET })
-  db.prepare("DELETE FROM yelp_cache WHERE cache_key = 'hood_boundaries_v1'").run()
+  db.prepare("DELETE FROM yelp_cache WHERE cache_key = 'hood_boundaries_v2'").run()
 })
 
 // Don't leave the mocked dataset in the shared SQLite cache after the run
 afterAll(() => {
-  db.prepare("DELETE FROM yelp_cache WHERE cache_key = 'hood_boundaries_v1'").run()
+  db.prepare("DELETE FROM yelp_cache WHERE cache_key = 'hood_boundaries_v2'").run()
 })
 
 describe('GET /api/neighborhoods/boundaries', () => {
@@ -44,7 +44,7 @@ describe('GET /api/neighborhoods/boundaries', () => {
     const res = await request(app).get('/api/neighborhoods/boundaries')
     expect(res.status).toBe(200)
     expect(res.body.type).toBe('FeatureCollection')
-    expect(res.body.features).toHaveLength(12)
+    expect(res.body.features).toHaveLength(14)
     for (const f of res.body.features) {
       expect(f.type).toBe('Feature')
       expect(f.properties).toMatchObject({
@@ -96,7 +96,7 @@ describe('GET /api/neighborhoods/boundaries', () => {
     const res = await request(app).get('/api/neighborhoods/boundaries')
     expect(res.status).toBe(200)
     expect(res.body.type).toBe('FeatureCollection')
-    expect(res.body.features).toHaveLength(12)
+    expect(res.body.features).toHaveLength(14)
     const sv = res.body.features.find(f => f.properties.id === 'streeterville')
     expect(sv.geometry.type).toBe('Polygon')
     expect(sv.geometry.coordinates[0][0]).toEqual([-87.624, 41.883])
