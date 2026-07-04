@@ -139,24 +139,28 @@
 .home-search-pill svg { color: var(--accent); flex-shrink: 0; }
 .home-search-pill span:nth-child(2) { flex: 1; text-align: left; }
 
-/* Top-right mode pills — sit left of the IntelFeed column */
+/* Top-right control rows — stacked in the band above the IntelFeed panel */
 .home-mode-pills {
   position: absolute;
   top: 16px;
-  right: 288px;
+  right: 16px;
   z-index: 10;
   display: flex;
   gap: 6px;
+  justify-content: flex-end;
+  width: 272px;
 }
 
-/* Lighting preset pills — under the mode pills */
+/* Lighting preset pills — second row, same column */
 .home-light-pills {
   position: absolute;
-  top: 54px;
-  right: 288px;
+  top: 56px;
+  right: 16px;
   z-index: 10;
   display: flex;
   gap: 6px;
+  justify-content: flex-end;
+  width: 272px;
 }
 
 .home-light-pills .hud-pill {
@@ -284,8 +288,16 @@ body.atlas-mode .intel-feed {
 .home-map .mapboxgl-popup-anchor-left   .mapboxgl-popup-tip { border-right-color:  var(--panel-solid); }
 .home-map .mapboxgl-popup-anchor-right  .mapboxgl-popup-tip { border-left-color:   var(--panel-solid); }
 
+/* Keep the centered search pill clear of the right-hand control column */
+@media (max-width: 1150px) {
+  .home-search-pill {
+    left: calc(var(--sidebar-w, 208px) + 16px);
+    transform: none;
+    min-width: 0;
+  }
+}
+
 @media (max-width: 900px) {
   .home-search-pill { min-width: 0; }
-  .home-mode-pills { right: 16px; top: 64px; }
   .home-hints { display: none; }
 }

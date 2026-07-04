@@ -250,12 +250,13 @@ function addNeighborhoodLayers(map, data) {
     source: 'neighborhood-boundaries',
     paint: {
       'fill-color': ['get', 'color'],
+      'fill-emissive-strength': 1,
       // Readable at overview, then fades so the 3D city owns the close-up
       'fill-opacity': [
         'interpolate', ['linear'], ['zoom'],
-        10, 0.26,
-        13.5, 0.16,
-        15, 0.06,
+        10, 0.30,
+        13.5, 0.20,
+        15, 0.08,
         16, 0.02,
       ],
     },
@@ -267,11 +268,12 @@ function addNeighborhoodLayers(map, data) {
     source: 'neighborhood-boundaries',
     paint: {
       'line-color': ['get', 'color'],
+      'line-emissive-strength': 1,
       'line-opacity': [
         'interpolate', ['linear'], ['zoom'],
-        10, 0.65,
-        15, 0.3,
-        16, 0.12,
+        10, 0.75,
+        15, 0.35,
+        16, 0.15,
       ],
       'line-width': 1.5,
     },
@@ -416,32 +418,32 @@ export default function HomePage() {
       ]
       map.addLayer({ id: 'cta-routes-atmo', type: 'line', slot: 'middle', source: 'cta-routes',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': noGlowColor, 'line-width': 24, 'line-blur': 18, 'line-opacity': 0.04 },
+        paint: { 'line-color': noGlowColor, 'line-width': 24, 'line-blur': 18, 'line-opacity': 0.04, 'line-emissive-strength': 1 },
       })
       map.addLayer({ id: 'cta-routes-glow', type: 'line', slot: 'middle', source: 'cta-routes',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': noGlowColor, 'line-width': 5, 'line-blur': 2, 'line-opacity': 0.22 },
+        paint: { 'line-color': noGlowColor, 'line-width': 7, 'line-blur': 3, 'line-opacity': 0.4, 'line-emissive-strength': 1 },
       })
       map.addLayer({ id: 'cta-routes-solid', type: 'line', slot: 'middle', source: 'cta-routes',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': ['get', 'color'], 'line-width': 2.5, 'line-opacity': 0.92 },
+        paint: { 'line-color': ['get', 'color'], 'line-width': 3.2, 'line-opacity': 1, 'line-emissive-strength': 1 },
       })
       map.addLayer({ id: 'cta-routes-core', type: 'line', slot: 'middle', source: 'cta-routes',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#ffffff', 'line-width': 0.75, 'line-opacity': 0.22 },
+        paint: { 'line-color': '#ffffff', 'line-width': 0.75, 'line-opacity': 0.22, 'line-emissive-strength': 1 },
       })
 
       // Train sources + layers
       map.addSource('cta-trains', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       map.addLayer({ id: 'cta-train-ring', type: 'circle', slot: 'top', source: 'cta-trains',
         paint: {
-          'circle-radius': 11, 'circle-color': ['get', 'color'],
+          'circle-radius': 11, 'circle-color': ['get', 'color'], 'circle-emissive-strength': 1,
           'circle-opacity': 0.12, 'circle-stroke-width': 0,
         }
       })
       map.addLayer({ id: 'cta-train-dots', type: 'circle', slot: 'top', source: 'cta-trains',
         paint: {
-          'circle-radius': 4, 'circle-color': ['get', 'color'],
+          'circle-radius': 4.5, 'circle-color': ['get', 'color'], 'circle-emissive-strength': 1,
           'circle-stroke-color': '#ffffff', 'circle-stroke-width': 1.5,
           'circle-stroke-opacity': 0.85, 'circle-opacity': 1,
         }
@@ -470,6 +472,7 @@ export default function HomePage() {
           'icon-image': ['get', 'icon'], 'icon-size': 0.85,
           'icon-allow-overlap': true, 'icon-ignore-placement': true, 'icon-anchor': 'center',
         },
+        paint: { 'icon-emissive-strength': 1 },
       })
       map.on('click', 'home-food-icons', e => {
         const { name, address, category } = e.features[0].properties
@@ -493,6 +496,7 @@ export default function HomePage() {
           'icon-image': ['get', 'icon'], 'icon-size': 0.85,
           'icon-allow-overlap': true, 'icon-ignore-placement': true, 'icon-anchor': 'center',
         },
+        paint: { 'icon-emissive-strength': 1 },
       })
       map.on('click', 'home-nl-icons', e => {
         const { name, address, category } = e.features[0].properties
@@ -520,6 +524,7 @@ export default function HomePage() {
           'symbol-sort-key': ['match', ['get', 'name'], ['Bulls', 'Bears'], 1, 0],
           'icon-allow-overlap': true, 'icon-ignore-placement': true, 'icon-anchor': 'center',
         },
+        paint: { 'icon-emissive-strength': 1 },
       })
       map.on('click', 'stadium-icons', e => {
         const { name, stadium } = e.features[0].properties
@@ -579,9 +584,9 @@ export default function HomePage() {
       }
 
       if (map.getLayer('cta-routes-glow')) {
-        const glow = 0.28 + Math.sin(phase.glow) * 0.12
+        const glow = 0.5 + Math.sin(phase.glow) * 0.16
         map.setPaintProperty('cta-routes-glow', 'line-opacity', glow)
-        map.setPaintProperty('cta-routes-atmo', 'line-opacity', 0.04 + Math.sin(phase.glow) * 0.04)
+        map.setPaintProperty('cta-routes-atmo', 'line-opacity', 0.09 + Math.sin(phase.glow) * 0.05)
       }
       if (map.getLayer('cta-train-ring')) {
         const halo = 0.07 + (1 + Math.sin(phase.ring)) / 2 * 0.13

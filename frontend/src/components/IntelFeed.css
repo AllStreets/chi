@@ -2,10 +2,10 @@
 
 .intel-feed {
   position: absolute;
-  top: 64px;
+  top: 100px;   /* mode + lighting pill rows live in the band above */
   right: 16px;
   width: 272px;
-  max-height: calc(100vh - 96px);
+  max-height: calc(100vh - 132px);
   z-index: 10;
 
   /* .hud-panel glass recipe */
