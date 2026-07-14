@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-label="CHI ATLAS — a cinematic city-intelligence atlas for Chicago">
+  <defs>
+    <!-- Subtle dot grid -->
+    <pattern id="grid" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="0.9" fill="#0a1420"/>
+    </pattern>
+
+    <!-- Cyan wordmark gradient (vertical depth) -->
+    <linearGradient id="cyan" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#b8f1ff"/>
+      <stop offset="50%"  stop-color="#45d8ff"/>
+      <stop offset="100%" stop-color="#0e7fa8"/>
+    </linearGradient>
+
+    <!-- Glossy top highlight on the title -->
+    <linearGradient id="cyanLight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.5"/>
+      <stop offset="40%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Soft cyan glow halo behind the title -->
+    <filter id="glow" x="-10%" y="-30%" width="120%" height="160%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Accent stripe gradient (top + bottom borders): cyan into Chicago red -->
+    <linearGradient id="stripe" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#45d8ff" stop-opacity="0"/>
+      <stop offset="45%"  stop-color="#45d8ff" stop-opacity="1"/>
+      <stop offset="75%"  stop-color="#ff3b53" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#ff3b53" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Side panel face -->
+    <linearGradient id="panel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#0a1119" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#04070c" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Ambient glows: cyan off the lake edge, red over the grid -->
+    <radialGradient id="glowCyan" cx="0.72" cy="0.35" r="0.45">
+      <stop offset="0" stop-color="#45d8ff" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#45d8ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowRed" cx="0.18" cy="0.75" r="0.4">
+      <stop offset="0" stop-color="#ff3b53" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#ff3b53" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Chicago flag six-pointed star -->
+    <path id="star" d="M0,-9 L1.6,-2.77 L7.79,-4.5 L3.2,0 L7.79,4.5 L1.6,2.77 L0,9 L-1.6,2.77 L-7.79,4.5 L-3.2,0 L-7.79,-4.5 L-1.6,-2.77 Z"/>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="340" fill="#030509"/>
+  <rect width="1200" height="340" fill="url(#grid)"/>
+  <rect width="1200" height="340" fill="url(#glowCyan)"/>
+  <rect width="1200" height="340" fill="url(#glowRed)"/>
+
+  <!-- Top + bottom accent stripes -->
+  <rect x="0" y="0" width="1200" height="1.5" fill="url(#stripe)"/>
+  <rect x="0" y="338.5" width="1200" height="1.5" fill="url(#stripe)"/>
+
+  <!-- Faint L-line schematic — a transit band running the bottom edge -->
+  <g fill="none" stroke-width="2" opacity="0.4" stroke-linecap="round">
+    <path d="M 40 322 L 250 322 L 262 310 L 640 310"  stroke="#c60c30"/>
+    <path d="M 70 330 L 300 330 L 314 316 L 700 316"  stroke="#00a1de"/>
+    <path d="M 120 314 L 330 314 L 342 326 L 780 326" stroke="#009b3a"/>
+    <path d="M 60 306 L 210 306 L 222 318 L 460 318"  stroke="#f9461c"/>
+    <path d="M 260 306 L 420 306 L 432 318"           stroke="#522398"/>
+    <path d="M 480 306 L 600 306 L 612 318"           stroke="#62361b"/>
+    <path d="M 500 330 L 620 330 L 632 318 L 720 318" stroke="#e27ea6"/>
+    <path d="M 350 322 L 470 322 L 482 310"           stroke="#f9e300"/>
+  </g>
+  <g opacity="0.7" fill="#45d8ff">
+    <circle cx="262" cy="310" r="2.5"/>
+    <circle cx="432" cy="318" r="2.5"/>
+    <circle cx="632" cy="318" r="2.5"/>
+    <circle cx="482" cy="310" r="2.5"/>
+    <circle cx="640" cy="310" r="3"/>
+    <circle cx="700" cy="316" r="3"/>
+    <circle cx="780" cy="326" r="3"/>
+  </g>
+
+  <!-- Eyebrow — small mono tag + coordinates -->
+  <g transform="translate(80, 78)">
+    <rect x="0" y="-13" width="16" height="2" fill="#45d8ff"/>
+    <text x="26" y="0" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" fill="#45d8ff" letter-spacing="0.35em">CHI · ATLAS</text>
+    <text x="240" y="0" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11" fill="#5c6b7d" letter-spacing="0.18em">41.8921°N · 87.6172°W</text>
+  </g>
+
+  <!-- Four Chicago-flag stars, right of the eyebrow row -->
+  <g fill="#ff3b53" opacity="0.9">
+    <use href="#star" transform="translate(560, 74) scale(0.9)"/>
+    <use href="#star" transform="translate(588, 74) scale(0.9)"/>
+    <use href="#star" transform="translate(616, 74) scale(0.9)"/>
+    <use href="#star" transform="translate(644, 74) scale(0.9)"/>
+  </g>
+
+  <!-- Big 3D wordmark · 4-layer stack -->
+  <g transform="translate(80, 208)">
+    <!-- 1. Depth shadow -->
+    <text font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-weight="900" font-size="96" fill="#081018" letter-spacing="-0.03em" transform="translate(5, 5)">CHI ATLAS.</text>
+    <!-- 2. Soft glow halo -->
+    <text font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-weight="900" font-size="96" fill="#45d8ff" fill-opacity="0.35" letter-spacing="-0.03em" filter="url(#glow)">CHI ATLAS.</text>
+    <!-- 3. Painted face -->
+    <text font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-weight="900" font-size="96" fill="url(#cyan)" letter-spacing="-0.03em">CHI ATLAS.</text>
+    <!-- 4. Glossy top highlight -->
+    <text font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-weight="900" font-size="96" fill="url(#cyanLight)" letter-spacing="-0.03em">CHI ATLAS.</text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="80" y="256" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="19" fill="#9fb2c5">
+    A cinematic city-intelligence atlas for Chicago.
+  </text>
+  <text x="80" y="286" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" fill="#5c6b7d" letter-spacing="0.04em">
+    Live L trains · lake conditions · scores · events — the whole city, one ⌘K away
+  </text>
+
+  <!-- Right-side stats panel -->
+  <g transform="translate(840, 60)">
+    <rect x="0" y="0" width="280" height="220" rx="12" fill="url(#panel)" stroke="#15222f" stroke-width="1"/>
+
+    <!-- Header rule -->
+    <line x1="20" y1="32" x2="48" y2="32" stroke="#45d8ff" stroke-width="2"/>
+    <text x="56" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11" fill="#45d8ff" letter-spacing="0.18em">CITY SNAPSHOT</text>
+
+    <!-- 10 surfaces -->
+    <text x="20" y="74" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="32" fill="#e6edf3">10</text>
+    <text x="20" y="92" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11" fill="#5c6b7d" letter-spacing="0.14em">LIVE SURFACES</text>
+
+    <!-- 8 L lines -->
+    <text x="20" y="132" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="32" fill="#45d8ff">8</text>
+    <text x="20" y="150" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11" fill="#5c6b7d" letter-spacing="0.14em">CTA L LINES, LIVE</text>
+
+    <!-- 7 data feeds -->
+    <text x="20" y="190" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="32" fill="#ff3b53">7</text>
+    <text x="20" y="208" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11" fill="#5c6b7d" letter-spacing="0.14em">CITY DATA FEEDS</text>
+  </g>
+</svg>

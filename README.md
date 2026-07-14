@@ -1,214 +1,226 @@
-# CHI ATLAS
+<div align="center">
 
-A cinematic city-intelligence atlas for Chicago, centered on Streeterville.
-Dark mission-control HUD: glass panels, neon transit glows, mono clocks, and a
-global ⌘K command palette over live city data.
+<img src=".github/assets/chi-banner.svg" alt="CHI ATLAS — a cinematic city-intelligence atlas for Chicago" width="100%"/>
 
-Successor to [chicago-explore](https://github.com/AllStreets/chicago-explore) —
-same feature set, fully overhauled design.
+&nbsp;
 
-Repo: https://github.com/AllStreets/chi
+<img alt="live surfaces" src="https://img.shields.io/badge/live_surfaces-10-45d8ff?style=for-the-badge&labelColor=030509"/>
+<img alt="CTA L lines" src="https://img.shields.io/badge/CTA_L_lines_live-8-ff3b53?style=for-the-badge&labelColor=030509"/>
+<img alt="city data feeds" src="https://img.shields.io/badge/city_data_feeds-7-45d8ff?style=for-the-badge&labelColor=030509"/>
+<img alt="command palette" src="https://img.shields.io/badge/%E2%8C%98K-everywhere-e6edf3?style=for-the-badge&labelColor=030509"/>
+<br/>
+<img alt="stack" src="https://img.shields.io/badge/stack-React_19_·_Vite_·_Express_5-6b7382?style=flat-square&labelColor=030509"/>
+<img alt="maps" src="https://img.shields.io/badge/maps-Mapbox_GL_·_Standard_3D-6b7382?style=flat-square&labelColor=030509"/>
+<img alt="cache" src="https://img.shields.io/badge/cache-SQLite_·_better--sqlite3-6b7382?style=flat-square&labelColor=030509"/>
+<img alt="pwa" src="https://img.shields.io/badge/PWA-installable_·_push_alerts-6b7382?style=flat-square&labelColor=030509"/>
+<img alt="tests" src="https://img.shields.io/badge/tests-Vitest_·_Jest_+_Supertest-6b7382?style=flat-square&labelColor=030509"/>
+
+&nbsp;
+
+<a href="#quickstart"><kbd> &nbsp; <strong>Quickstart</strong> &nbsp; </kbd></a> &nbsp;
+<a href="#the-ten-surfaces"><kbd> &nbsp; <strong>The ten surfaces</strong> &nbsp; </kbd></a> &nbsp;
+<a href="#k--the-command-palette"><kbd> &nbsp; <strong>⌘K palette</strong> &nbsp; </kbd></a> &nbsp;
+<a href="#live-data"><kbd> &nbsp; <strong>Live data</strong> &nbsp; </kbd></a> &nbsp;
+<a href="#under-the-hood"><kbd> &nbsp; <strong>Under the hood</strong> &nbsp; </kbd></a> &nbsp;
+<a href="#deployment"><kbd> &nbsp; <strong>Deployment</strong> &nbsp; </kbd></a>
+
+</div>
 
 ---
 
-## Pages
+<p align="center">
+  <img src=".github/assets/chi-home.png" alt="CHI ATLAS home — dusk over Streeterville, 3D skyline, live L trains, floating IntelFeed" width="100%"/>
+</p>
 
-| Route | Page | Description |
+<p align="center"><em>Dusk over Streeterville. Every dot is live: trains on the L, tonight's bars, the lake at the horizon — and the IntelFeed keeping score on the right.</em></p>
+
+---
+
+## What this is
+
+**CHI ATLAS is a mission-control room for one city.** A dark, cinematic HUD over live Chicago data — glass panels, neon transit glows, mono clocks — built around a 3D Mapbox map that opens with a fly-in over Streeterville and never really sits still. L trains crawl the map in their real positions. Scores refresh while the game is on. The lake tells you whether it's a beach day. Everything is reachable from one ⌘K palette.
+
+It is the successor to [chicago-explore](https://github.com/AllStreets/chicago-explore) — same feature set, fully overhauled design: one visual language (near-black canvas, electric cyan, Chicago red), one type system (Michroma for display, Archivo for UI, IBM Plex Mono for anything that ticks), and film grain over all of it.
+
+> *The city is already broadcasting. This is the receiver.*
+
+```
+  the atlas
+  ├─ home ............ 3D dusk-lit map — live L dots, stadium pins, IntelFeed
+  ├─ transit ......... all 8 L lines + a 24h time machine (1×–240× replay)
+  ├─ explore ......... curated landmarks by category, with an AI guide
+  ├─ nightlife ....... bars to jazz rooms across 7 neighborhood scenes
+  ├─ food ............ OSM-powered map — pizza, sushi, tacos, brunch
+  ├─ sports .......... Cubs · Sox · Bears · Bulls · Blackhawks · Fire, live
+  ├─ events .......... Ticketmaster listings, color-coded by type
+  ├─ weather ......... conditions + an animated Lake Michigan (8 states)
+  ├─ neighborhoods ... character, stats, vibe tags, an AI live-in advisor
+  └─ my chicago ...... every place you saved or set foot in
+```
+
+---
+
+## The ten surfaces
+
+| Route | Surface | What it does |
 |---|---|---|
-| `/` | Home | Cinematic 3D Mapbox map (Standard style) with intro fly-in, Orbit mode, Atlas Mode (chrome-free ambient orbit), dawn/day/dusk/night lighting presets (solar-time default) — live CTA train dots, official team logo stadium pins, food and nightlife icons, floating glass IntelFeed, ⌘K search pill |
-| `/explore` | Explore Chicago | Curated landmarks by category (architecture, culture, nature, hidden) with AI guide chat |
-| `/transit` | Transit | Tokyo-Metro-style HUD — full-bleed pitched map, floating glass line panel for all 8 CTA L lines with live per-line counts, animated train positions, Divvy stations, bus overlay, **time-machine**: replay the last 24h of train movement with a scrubber (1×–240×) |
-| `/nightlife` | Nightlife | Bars, night clubs, cocktail bars, rooftop bars, wine bars, jazz venues — Mapbox map + 7 neighborhood scene profiles including Streeterville |
-| `/food` | Food & Drink | OSM-powered restaurant map with cuisine filters (restaurants, bars, cafes, pizza, sushi, tacos, brunch) |
-| `/sports` | Sports | Cubs, Sox, Bears, Bulls, Blackhawks, Fire — live scores (refreshes every 90s), today's games, upcoming schedule |
-| `/events` | Events | Ticketmaster-powered event listings, color-coded by type with filter tabs |
-| `/weather` | Weather & Lake | Current conditions, HIGH/NOW/LOW tiles, animated Lake Michigan scene (8 weather states) |
-| `/neighborhoods` | Neighborhoods | Per-neighborhood character, stats, vibe tags, AI brief, and AI live-in advisor |
-| `/me` | My Chicago | Saved favorites and been-there places from Food, Nightlife, and Explore pages |
+| `/` | **Home** | Cinematic 3D map (Mapbox Standard) with intro fly-in, Orbit mode, chrome-free **Atlas Mode**, and dawn / day / dusk / night lighting that defaults to Chicago solar time. Live CTA train dots, official team-logo stadium pins, food and nightlife icons, floating glass IntelFeed. |
+| `/transit` | **Transit** | Tokyo-Metro-style HUD — full-bleed pitched map, glass panel for all **8 CTA L lines** with live per-line counts, animated train positions, Divvy stations, bus overlay, and a **time machine** that replays the last 24h of train movement with a scrubber. |
+| `/explore` | **Explore** | Curated landmarks — architecture, culture, nature, hidden — with an AI guide chat. |
+| `/nightlife` | **Nightlife** | Bars, clubs, cocktail and rooftop bars, wine bars, jazz venues, plus profiles for 7 nightlife neighborhoods, Streeterville included. |
+| `/food` | **Food & Drink** | OSM-powered restaurant map with cuisine filters — restaurants, bars, cafes, pizza, sushi, tacos, brunch. |
+| `/sports` | **Sports** | All six teams — live scores refreshing every 90s, today's games, upcoming schedule. |
+| `/events` | **Events** | Ticketmaster listings, color-coded by type with filter tabs. |
+| `/weather` | **Weather & Lake** | HIGH / NOW / LOW tiles and an animated Lake Michigan scene with 8 weather states. |
+| `/neighborhoods` | **Neighborhoods** | Per-neighborhood character, stats, vibe tags, AI brief, and an AI live-in advisor. |
+| `/me` | **My Chicago** | Saved favorites and been-there places, collected from Food, Nightlife, and Explore. |
+
+<table>
+<tr>
+<td width="50%"><img src=".github/assets/chi-transit.png" alt="Transit — all 8 CTA L lines live on a full-bleed dark map with a glass line panel" width="100%"/></td>
+<td width="50%"><img src=".github/assets/chi-nightlife.png" alt="Nightlife — venue map with 7 neighborhood scene profiles" width="100%"/></td>
+</tr>
+<tr>
+<td><em>Transit — eight lines, live counts, and a 24-hour time machine.</em></td>
+<td><em>Nightlife — the whole scene, one neighborhood at a time.</em></td>
+</tr>
+<tr>
+<td width="50%"><img src=".github/assets/chi-weather.png" alt="Weather &amp; Lake — HIGH/NOW/LOW tiles over an animated Lake Michigan scene" width="100%"/></td>
+<td width="50%"><img src=".github/assets/chi-sports.png" alt="Sports — six team cards with live scores and schedules" width="100%"/></td>
+</tr>
+<tr>
+<td><em>Weather &amp; Lake — is it a beach day? The lake scene answers first.</em></td>
+<td><em>Sports — six teams, live scores, next games.</em></td>
+</tr>
+</table>
 
 ---
 
-## Tech Stack
+## ⌘K — the command palette
 
-**Frontend**
-- React 19, Vite, React Router v7
-- Mapbox GL JS (maps on Home, Transit, Food, Nightlife)
-- react-icons/ri (Remix Icons — no emojis)
-- Vitest + React Testing Library
+One keystroke from anywhere:
 
-**Backend**
-- Express 5, Node.js 18+
-- better-sqlite3 (SQLite — caches API responses, stores user favorites/visited)
-- Jest + Supertest
+- **Go** — jump between all ten surfaces.
+- **Find** — deep search across places, L stations, neighborhoods, and events; picking a result flies the map to it.
+- **Ask ATLAS** — an AI concierge riding the same palette.
 
-**Design — "CHI ATLAS" HUD language**
-- Canvas: `#030509` near-black · Accent: `#45d8ff` electric cyan · Secondary: `#ff3b53` Chicago red
-- Glass panels (`backdrop-filter` blur + hairline borders), film-grain overlay, vignettes on map pages
-- Fonts: Michroma (display), Archivo (UI), IBM Plex Mono (data/clocks)
-- Global ⌘K command palette: page nav + deep search (places, L stations, neighborhoods, events) with map fly-to, plus "Ask ATLAS" AI concierge
-- Map controls: drag rotate, scroll zoom, ↑/↓ pitch, Orbit + Atlas ambient modes; kbd-hint bars on map pages
-- Installable PWA (manifest + service worker); push alerts for games, severe weather, lake days, L delays
-- Full spec: [docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md](./docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md)
-
-**External APIs**
-| API | Used For | Key Required |
-|---|---|---|
-| OpenWeatherMap | Current weather + lake conditions | Yes |
-| CTA Train Tracker | Live L train positions | Yes |
-| OpenStreetMap / Overpass | Food, drink, and nightlife places | No |
-| Ticketmaster Discovery | Events listings | Yes |
-| ESPN (public scoreboard) | Sports scores + schedules | No |
-| Mapbox | Maps | 50k loads/mo free |
-| OpenAI | AI streaming (Explore, Neighborhoods) | Yes (pay per token) |
+Map surfaces add their own physical controls: drag to rotate, scroll to zoom, `↑` `↓` to pitch, plus Orbit and Atlas ambient modes — with kbd-hint bars on every map page so you never have to remember any of it.
 
 ---
 
-## Local Development
-
-### 1. Clone
+## Quickstart
 
 ```bash
 git clone https://github.com/AllStreets/chi.git
 cd chi
 ```
 
-### 2. Backend
+**Backend** (terminal one):
 
 ```bash
 cd backend
 npm install
-cp .env.example .env   # fill in keys (see Environment Variables below)
-node server.js
+cp .env.example .env    # fill in keys — see Environment variables
+node server.js          # http://localhost:3001
 ```
 
-Runs at `http://localhost:3001`.
-
-### 3. Frontend
+**Frontend** (terminal two):
 
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev             # http://localhost:5173
 ```
 
-Runs at `http://localhost:5173`. Both must be running simultaneously.
+Both must run simultaneously. Without API keys the app degrades gracefully — maps show a placeholder and data sections say "add key to enable" instead of breaking.
 
 ---
 
-## Environment Variables
+## Live data
 
-### Backend (`backend/.env`)
+Seven feeds, one SQLite cache between them and the rate limits:
+
+| Feed | Source | Key | Cached |
+|---|---|---|---|
+| Live L train positions | CTA Train Tracker | required | live poll, animated between updates |
+| Weather + lake conditions | OpenWeatherMap | required | per-request |
+| Food · drink · nightlife places | OpenStreetMap / Overpass | none | 6 hours |
+| Events | Ticketmaster Discovery | required | per-request |
+| Scores + schedules | ESPN public scoreboard | none | 90 seconds live · 1 hour schedule |
+| Maps + 3D buildings | Mapbox GL (Standard style) | token (50k loads/mo free) | — |
+| AI guide · advisor · concierge | OpenAI | required (pay per token) | streams |
+
+Divvy bike stations ride along on the transit map from the public GBFS feed — no key needed. On the frontend, place data also lives in a module-level cache that survives navigation, so Food and Nightlife load instantly after the homepage prefetches them.
+
+---
+
+## Environment variables
+
+**Backend** — `backend/.env`:
 
 | Variable | Required | Description |
 |---|---|---|
-| `OPENWEATHER_KEY` | Yes | OpenWeatherMap API key — [openweathermap.org](https://openweathermap.org) |
-| `OPENWEATHER_API_KEY` | Yes | Same key as above (used by two routes) |
-| `OPENAI_API_KEY` | Yes | OpenAI API key — [platform.openai.com](https://platform.openai.com) — powers AI streaming |
-| `TICKETMASTER_KEY` | Yes | Ticketmaster Discovery API — [developer.ticketmaster.com](https://developer.ticketmaster.com) |
+| `OPENWEATHER_KEY` | Yes | OpenWeatherMap key — [openweathermap.org](https://openweathermap.org) |
+| `OPENWEATHER_API_KEY` | Yes | Same key as above (two routes read different names) |
+| `OPENAI_API_KEY` | Yes | OpenAI key — powers the AI streaming — [platform.openai.com](https://platform.openai.com) |
+| `TICKETMASTER_KEY` | Yes | Ticketmaster Discovery — [developer.ticketmaster.com](https://developer.ticketmaster.com) |
 | `CTA_API_KEY` | Yes | CTA Train Tracker — [transitchicago.com/developers](https://www.transitchicago.com/developers/) |
-| `FRONTEND_URL` | Yes | Your Vercel URL — used for CORS, e.g. `https://your-app.vercel.app` |
-| `PORT` | No | Do not set — Railway injects this automatically |
+| `FRONTEND_URL` | Yes | Your deployed frontend URL — used for CORS |
+| `PORT` | No | Leave unset — Railway injects it |
 
-### Frontend (`frontend/.env`)
+**Frontend** — `frontend/.env`:
 
 | Variable | Required | Description |
 |---|---|---|
 | `VITE_MAPBOX_TOKEN` | Yes | Mapbox public token — [mapbox.com](https://mapbox.com) |
-| `VITE_API_URL` | Yes | Your Railway backend URL, e.g. `https://your-api.railway.app` |
-
-Without API keys the app degrades gracefully — maps show a placeholder, data sections show "add key to enable".
+| `VITE_API_URL` | Yes | Your backend URL, e.g. `https://your-api.railway.app` |
 
 ---
 
-## Testing
-
-```bash
-# Backend
-cd backend && npm test
-
-# Frontend
-cd frontend && npx vitest run
-```
-
----
-
-## Project Structure
+## Under the hood
 
 ```
 chi/
-├── backend/
-│   ├── routes/
-│   │   ├── ai.js               # OpenAI streaming — Explore + Neighborhoods AI
-│   │   ├── cta.js              # CTA Train Tracker — live L train positions
-│   │   ├── divvy.js            # Divvy bike stations (public GBFS feed, no key needed)
-│   │   ├── events.js           # Ticketmaster — events (today → +30 days)
-│   │   ├── home-feed.js        # Aggregated homepage feed (weather, sports, events, trains)
-│   │   ├── lake.js             # Lake Michigan conditions + niceScore
-│   │   ├── me.js               # Favorites + visited persistence (SQLite)
-│   │   ├── neighborhoods.js    # Static neighborhood data + AI advisor
-│   │   ├── sports.js           # ESPN scoreboard + team schedules
-│   │   ├── weather.js          # OpenWeatherMap current conditions
-│   │   └── yelp.js             # Overpass/OSM — food, drink, and nightlife places (no API key needed)
-│   ├── tests/                  # Jest + Supertest backend tests
-│   ├── db.js                   # SQLite setup (cache + favorites tables)
-│   ├── server.js               # Express app entry point
-│   ├── chicago.db              # SQLite database (gitignored)
-│   └── Procfile                # Railway start command
+├─ backend/                  Express 5 · Node 18+
+│  ├─ routes/                one file per feed — cta, weather, lake, sports,
+│  │                         events, yelp (OSM), divvy, neighborhoods, ai, me
+│  ├─ db.js                  SQLite — API cache + favorites/visited tables
+│  ├─ server.js              app entry
+│  └─ tests/                 Jest + Supertest
 │
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── IntelFeed.jsx   # Live intel sidebar (weather, sports, events, trains)
-│   │   │   ├── MapPlaceholder.jsx
-│   │   │   └── Sidebar.jsx     # Navigation sidebar
-│   │   ├── hooks/
-│   │   │   ├── useCTA.js       # CTA train polling + animation state
-│   │   │   ├── useHomeFeed.js  # Homepage feed (polls every 60s)
-│   │   │   ├── useMe.js        # Favorites/visited read+write
-│   │   │   ├── useMidnightRefresh.js  # Auto-refresh at midnight (Sports, Events, Weather)
-│   │   │   ├── useWeather.js   # Weather + lake data
-│   │   │   └── useYelp.js      # Overpass/OSM places fetcher with module-level cache
-│   │   ├── pages/
-│   │   │   ├── HomePage.jsx    # Mapbox map, CTA trains, stadium logos, food/nightlife icons
-│   │   │   ├── TransitPage.jsx # All 8 CTA L lines, animated trains, Divvy stations
-│   │   │   ├── NightlifePage.jsx  # Nightlife map + 7 neighborhood scene profiles
-│   │   │   ├── FoodPage.jsx    # Food & drink map + cuisine filters
-│   │   │   ├── SportsPage.jsx  # Team cards — live scores + schedules
-│   │   │   ├── EventsPage.jsx  # Ticketmaster events, color-coded by type
-│   │   │   ├── WeatherPage.jsx # Conditions tiles + animated Lake Michigan scene
-│   │   │   ├── ExplorePage.jsx # Curated landmarks + AI guide chat
-│   │   │   ├── NeighborhoodsPage.jsx  # Neighborhood profiles + AI advisor
-│   │   │   └── MyChicagoPage.jsx      # Saved favorites + been-there
-│   │   ├── utils/
-│   │   │   └── mapIcons.js     # Shared 2× HiDPI Mapbox icon factory (makeMapPin)
-│   │   ├── data/
-│   │   │   └── ctaRoutes.js    # CTA line geometry + colors
-│   │   └── styles/
-│   │       └── global.css      # Design tokens, typography, dark theme
-│   └── vercel.json             # SPA rewrite rule for React Router
+├─ frontend/                 React 19 · Vite · React Router v7
+│  ├─ src/pages/             the ten surfaces
+│  ├─ src/components/        IntelFeed · Sidebar · MapPlaceholder
+│  ├─ src/hooks/             useCTA · useWeather · useYelp · useHomeFeed ·
+│  │                         useMe · useMidnightRefresh
+│  ├─ src/utils/mapIcons.js  shared 2× HiDPI Mapbox pin factory
+│  ├─ src/data/ctaRoutes.js  CTA line geometry + colors
+│  └─ src/styles/global.css  design tokens · dark theme · film grain
 │
-├── README.md
-└── DEPLOYMENT.md               # Railway + Vercel setup guide
+└─ DEPLOYMENT.md             Railway + Vercel, step by step
 ```
 
----
+**The design language** — canvas `#030509` near-black, `#45d8ff` electric cyan, `#ff3b53` Chicago red. Glass panels with backdrop blur and hairline borders, vignettes on map pages, film grain over everything. Michroma / Archivo / IBM Plex Mono. Icons are Remix (react-icons) — **no emojis, anywhere**. Installable PWA with push alerts for games, severe weather, lake days, and L delays. Full spec: [docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md](./docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md).
 
-## Caching
+**Testing:**
 
-The backend caches all external API responses in SQLite to avoid rate limits and keep the UI snappy:
-
-| Data | TTL | Cache key |
-|---|---|---|
-| Food / nightlife places | 6 hours | `{"v":2,"type":"..."}` — bump `CACHE_VER` in `yelp.js` when queries change |
-| Sports live scores | 90 seconds | `sports_today_v1_{league}_{id}` |
-| Sports schedule | 1 hour | `sports_upcoming_v1_{league}_{id}` |
-| Weather / lake | Per-request (no cache) | — |
-| Events | Per-request (no cache) | — |
-
-Frontend places data is cached in a module-level `Map` in `useYelp.js` (named for historical reasons — it hits Overpass/OSM, not Yelp) — survives page navigation within the same session so Food and Nightlife pages load instantly after the homepage prefetches them.
+```bash
+cd backend  && npm test          # Jest + Supertest
+cd frontend && npx vitest run    # Vitest + React Testing Library
+```
 
 ---
 
 ## Deployment
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for the full Railway + Vercel setup guide with step-by-step instructions.
+Backend on Railway, frontend on Vercel — [DEPLOYMENT.md](./DEPLOYMENT.md) walks the whole path, keys included.
+
+---
+
+<div align="center">
+
+Built by [Connor Evans](https://github.com/AllStreets) in Streeterville — pointed at the whole city.
+
+<sub>Four stars on the flag. Eight lines on the map.</sub>
+
+</div>
