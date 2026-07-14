@@ -8,6 +8,7 @@
 <img alt="CTA L lines" src="https://img.shields.io/badge/CTA_L_lines_live-8-ff3b53?style=for-the-badge&labelColor=030509"/>
 <img alt="city data feeds" src="https://img.shields.io/badge/city_data_feeds-7-45d8ff?style=for-the-badge&labelColor=030509"/>
 <img alt="command palette" src="https://img.shields.io/badge/%E2%8C%98K-everywhere-e6edf3?style=for-the-badge&labelColor=030509"/>
+<a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-45d8ff?style=for-the-badge&labelColor=030509"/></a>
 <br/>
 <img alt="stack" src="https://img.shields.io/badge/stack-React_19_·_Vite_·_Express_5-6b7382?style=flat-square&labelColor=030509"/>
 <img alt="maps" src="https://img.shields.io/badge/maps-Mapbox_GL_·_Standard_3D-6b7382?style=flat-square&labelColor=030509"/>
@@ -219,7 +220,9 @@ Backend on Railway, frontend on Vercel — [DEPLOYMENT.md](./DEPLOYMENT.md) walk
 
 <div align="center">
 
-Built by [Connor Evans](https://github.com/AllStreets) in Streeterville — pointed at the whole city.
+**MIT** © 2026 [Connor Evans](https://github.com/AllStreets) — see [LICENSE](LICENSE)
+
+Built in Streeterville — pointed at the whole city.
 
 <sub>Four stars on the flag. Eight lines on the map.</sub>
 
