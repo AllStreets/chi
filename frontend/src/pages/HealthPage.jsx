@@ -16,7 +16,7 @@ import './HealthPage.css'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || ''
 if (MAPBOX_TOKEN) mapboxgl.accessToken = MAPBOX_TOKEN
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 const CATEGORIES = [
   { key: 'gyms',      label: 'Gyms & Fitness',  color: '#00d4ff', Icon: RiHeartPulseLine  },

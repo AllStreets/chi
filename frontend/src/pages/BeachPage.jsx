@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { RiDropLine, RiWindyLine, RiTempHotLine, RiRefreshLine } from 'react-icons/ri'
 import './BeachPage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 function useBeach() {
   const [data, setData] = useState(null)

@@ -4,6 +4,9 @@ const cors = require('cors')
 
 const app = express()
 
+// Behind Vercel's edge network
+if (process.env.VERCEL) app.set('trust proxy', 1)
+
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
   /\.vercel\.app$/,
@@ -61,6 +64,7 @@ app.use('/api/push',          require('./routes/push'))
 app.use('/api/finance',       require('./routes/finance'))
 app.use('/api/news',          require('./routes/news'))
 app.use('/api/health-places', require('./routes/health'))
+app.use('/api/cron',          require('./routes/cron'))
 
 if (require.main === module) {
   const port = process.env.PORT || 3001

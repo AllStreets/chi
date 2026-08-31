@@ -11,7 +11,7 @@ import { sharedTrainState } from '../hooks/trainAnimState'
 import MapPlaceholder from '../components/MapPlaceholder'
 import './TransitPage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 const LINE_COLOR_MAP = {
   Red: '#ff0033', Blue: '#3b82f6', Brn: '#92400e',
   G: '#10b981', Org: '#f97316', P: '#8b5cf6',

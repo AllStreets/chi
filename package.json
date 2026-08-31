@@ -1,0 +1,15 @@
+{
+  "name": "chi",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Chicago Explorer — React SPA plus an Express API, deployed as one Vercel project",
+  "license": "MIT",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "npm run dev --prefix frontend",
+    "dev:api": "npm start --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
+    "test": "npm test --prefix backend && npm test --prefix frontend -- --run"
+  }
+}

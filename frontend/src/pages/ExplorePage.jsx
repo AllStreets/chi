@@ -5,7 +5,7 @@ import { nearestStation, fetchArrivals, LINE_COLORS } from '../utils/nearestStat
 import { LANDMARKS } from '../data/landmarks'
 import './ExplorePage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 function haversineMin(a, b) {
   const R = 6371

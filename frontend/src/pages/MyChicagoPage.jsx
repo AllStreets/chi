@@ -4,7 +4,7 @@ import useAtlasMap, { MAPBOX_TOKEN, mapboxgl } from '../hooks/useAtlasMap'
 import { LANDMARKS } from '../data/landmarks'
 import './MyChicagoPage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 function getUserId() {
   let id = localStorage.getItem('chicago_user_id')

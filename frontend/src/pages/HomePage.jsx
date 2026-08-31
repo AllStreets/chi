@@ -14,7 +14,7 @@ import { makeMapPin } from '../utils/mapIcons'
 import useHomeFeed from '../hooks/useHomeFeed'
 import './HomePage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 const CENTER = [-87.6172, 41.8921]
 const ZOOM   = 13.5
 

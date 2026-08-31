@@ -166,15 +166,17 @@ Divvy bike stations ride along on the transit map from the public GBFS feed — 
 | `OPENAI_API_KEY` | Yes | OpenAI key — powers the AI streaming — [platform.openai.com](https://platform.openai.com) |
 | `TICKETMASTER_KEY` | Yes | Ticketmaster Discovery — [developer.ticketmaster.com](https://developer.ticketmaster.com) |
 | `CTA_API_KEY` | Yes | CTA Train Tracker — [transitchicago.com/developers](https://www.transitchicago.com/developers/) |
-| `FRONTEND_URL` | Yes | Your deployed frontend URL — used for CORS |
-| `PORT` | No | Leave unset — Railway injects it |
+| `FRONTEND_URL` | No | Extra browser origin allowed through CORS. Not needed on the combined Vercel deployment (same origin). |
+| `CRON_SECRET` | No | Required only for the `/api/cron/*` endpoints in production |
+| `SQLITE_PATH` | No | Overrides the DB path — defaults to `/tmp/chicago.db` on Vercel, `backend/chicago.db` locally |
+| `PORT` | No | Leave unset — the host injects it |
 
 **Frontend** — `frontend/.env`:
 
 | Variable | Required | Description |
 |---|---|---|
 | `VITE_MAPBOX_TOKEN` | Yes | Mapbox public token — [mapbox.com](https://mapbox.com) |
-| `VITE_API_URL` | Yes | Your backend URL, e.g. `https://your-api.railway.app` |
+| `VITE_API_URL` | No | Leave unset — the SPA calls `/api` on its own origin, and falls back to `http://localhost:3001` in dev. Set it only if the API is hosted separately. |
 
 ---
 
@@ -198,7 +200,8 @@ chi/
 │  ├─ src/data/ctaRoutes.js  CTA line geometry + colors
 │  └─ src/styles/global.css  design tokens · dark theme · film grain
 │
-└─ DEPLOYMENT.md             Railway + Vercel, step by step
+├─ vercel.json               two services (Vite SPA + Express API), one domain
+└─ DEPLOYMENT.md             deploying to Vercel, step by step
 ```
 
 **The design language** — canvas `#030509` near-black, `#45d8ff` electric cyan, `#ff3b53` Chicago red. Glass panels with backdrop blur and hairline borders, vignettes on map pages, film grain over everything. Michroma / Archivo / IBM Plex Mono. Icons are Remix (react-icons) — **no emojis, anywhere**. Installable PWA with push alerts for games, severe weather, lake days, and L delays. Full spec: [docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md](./docs/superpowers/specs/2026-07-03-chi-atlas-overhaul-design.md).
@@ -214,7 +217,18 @@ cd frontend && npx vitest run    # Vitest + React Testing Library
 
 ## Deployment
 
-Backend on Railway, frontend on Vercel — [DEPLOYMENT.md](./DEPLOYMENT.md) walks the whole path, keys included.
+One Vercel project, two services — the Vite SPA and the Express API behind a
+single domain, so the frontend calls `/api` on its own origin. `vercel.json`
+carries the whole configuration:
+
+```bash
+vercel --prod
+```
+
+[DEPLOYMENT.md](./DEPLOYMENT.md) walks the whole path — environment variables,
+the Vercel Cron jobs that replace the in-process timers, and the one real
+caveat: `/tmp` storage is ephemeral, so saved places and push subscriptions
+need a durable database before they survive a cold start.
 
 ---
 

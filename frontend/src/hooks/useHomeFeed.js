@@ -1,7 +1,7 @@
 // frontend/src/hooks/useHomeFeed.js
 import { useState, useEffect } from 'react'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 export default function useHomeFeed() {
   const [feed, setFeed] = useState({ trainCount: null, weather: null, nextEvent: null, tonightGames: [] })

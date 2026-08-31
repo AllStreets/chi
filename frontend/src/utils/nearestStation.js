@@ -1,7 +1,7 @@
 // frontend/src/utils/nearestStation.js — "Get me there" transit helpers
 // Finds the nearest CTA L station to a point and fetches live arrivals for it.
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 export const LINE_COLORS = {
   Red: '#ff0033', Blue: '#3b82f6', Brn: '#92400e',

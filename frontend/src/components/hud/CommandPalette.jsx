@@ -10,7 +10,7 @@ import {
 } from 'react-icons/ri'
 import './CommandPalette.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 const DESTINATIONS = [
   { to: '/',              icon: RiHome4Line,           label: 'Home',           hint: 'Live city map' },

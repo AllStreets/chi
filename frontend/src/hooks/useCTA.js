@@ -1,7 +1,7 @@
 // frontend/src/hooks/useCTA.js
 import { useState, useEffect, useRef } from 'react'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 const POLL_MS = 15_000  // 15s for more live feel
 
 let _cachedTrains = []

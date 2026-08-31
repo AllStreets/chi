@@ -15,7 +15,7 @@ import {
 } from 'react-icons/ri'
 import './SettingsPage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 // ── localStorage hook ────────────────────────────────────────────────────────
 function useSetting(key, defaultValue) {

@@ -1,7 +1,21 @@
 const Database = require('better-sqlite3')
+const fs = require('fs')
 const path = require('path')
 
-const db = new Database(path.join(__dirname, 'chicago.db'))
+// Vercel's filesystem is read-only apart from /tmp, so on serverless the
+// database lives there. It is a cache plus per-user scratch state — every
+// table below is recreated on demand — so an empty /tmp db is a valid start.
+// SQLITE_PATH overrides both for anyone pointing at a mounted volume.
+function resolveDbPath() {
+  if (process.env.SQLITE_PATH) return process.env.SQLITE_PATH
+  if (process.env.VERCEL) return '/tmp/chicago.db'
+  return path.join(__dirname, 'chicago.db')
+}
+
+const dbPath = resolveDbPath()
+fs.mkdirSync(path.dirname(dbPath), { recursive: true })
+
+const db = new Database(dbPath)
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS yelp_cache (

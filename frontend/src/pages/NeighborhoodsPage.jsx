@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { RiMapPinLine, RiWalkLine, RiSubwayLine, RiHomeSmileLine, RiBrainLine } from 'react-icons/ri'
 import './NeighborhoodsPage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 function useNeighborhoods() {
   const [hoods, setHoods] = useState([])

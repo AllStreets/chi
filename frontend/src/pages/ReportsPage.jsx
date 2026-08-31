@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { RiAlertLine, RiRefreshLine } from 'react-icons/ri'
 import './ReportsPage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 const TYPE_LABELS = {
   'Graffiti Removal': 'Graffiti', 'Pothole in Street': 'Pothole',

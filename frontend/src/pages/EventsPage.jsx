@@ -7,7 +7,7 @@ import {
 import useMidnightRefresh from '../hooks/useMidnightRefresh'
 import './EventsPage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 const CATEGORIES = [
   { key: 'all',      label: 'All',      color: '#64748b', Icon: RiCalendarEventLine },

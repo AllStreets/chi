@@ -7,7 +7,7 @@ import {
 } from 'react-icons/ri'
 import './FinancePage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 // Matches the backend's market-hours cache TTL (60s) — polling faster than
 // the cache refreshes would only re-fetch identical data.
 const POLL_MS = 60_000

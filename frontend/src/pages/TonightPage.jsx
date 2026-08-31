@@ -11,7 +11,7 @@ import useCTA from '../hooks/useCTA'
 import useMidnightRefresh from '../hooks/useMidnightRefresh'
 import './TonightPage.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 // ─── Live clock ─────────────────────────────────────────────────────────────
 function useClock() {
